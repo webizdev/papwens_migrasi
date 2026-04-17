@@ -483,10 +483,11 @@ $seoTitle = $siteName . " - " . ($webData['heroTitleMain'] ?? 'Artisan Bakery & 
         const footer = document.querySelector('footer') || document.querySelector('[class*="footer"]');
         if (footer) {
           const siteNameDisplay = config.siteName || 'PAPWENS';
-          const brandArea = Array.from(footer.querySelectorAll('h1, h2, h3, h4, h5, div, span, a'))
+          const brandArea = Array.from(footer.querySelectorAll('h1, h2, h3, h4, h5, div, span, a, p'))
              .find(el => {
                 const txt = el.textContent.trim().toLowerCase();
-                return (txt === siteNameDisplay.toLowerCase() || txt === 'papwens' || el.querySelector('img[alt*="logo"]')) && el.children.length <= 1;
+                const siteName = (config.siteName || '').toLowerCase();
+                return (txt === siteName || txt === 'papwens' || txt.includes('©') || el.querySelector('img[alt*="logo"]'));
              });
 
           if (brandArea && !brandArea.dataset.hydrated) {
@@ -522,12 +523,16 @@ $seoTitle = $siteName . " - " . ($webData['heroTitleMain'] ?? 'Artisan Bakery & 
         });
 
         // 11. Branding Update: "2021 Established" -> "25+ experience"
-        document.querySelectorAll('div, span, p, h1, h2, h3').forEach(el => {
-           if (el.children.length === 0) {
-              if (el.textContent.trim() === '2021') el.textContent = '25+';
-              if (el.textContent.trim().toUpperCase() === 'ESTABLISHED') el.textContent = 'EXPERIENCE';
+        const findAndReplaceText = (root) => {
+           const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false);
+           let node;
+           while (node = walker.nextNode()) {
+              const text = node.nodeValue;
+              if (text && text.trim() === '2021') node.nodeValue = '25+';
+              if (text && text.trim().toUpperCase() === 'ESTABLISHED') node.nodeValue = 'EXPERIENCE';
            }
-        });
+        };
+        findAndReplaceText(document.body);
 
         // 12. Dynamic Admin Categories Sync (MySQL Source)
         if (window.location.pathname.includes('/admin')) {
@@ -577,8 +582,8 @@ $seoTitle = $siteName . " - " . ($webData['heroTitleMain'] ?? 'Artisan Bakery & 
       });
     </script>
 
-    <script type="module" crossorigin src="/assets/index-DU-yLjgB.js?v=1776467335375" defer></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-fjww86zz.css">
+    <script type="module" crossorigin src="/assets/index-DU-yLjgB.js?v=BUILD_2026_04_18_V2" defer></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-fjww86zz.css?v=BUILD_2026_04_18_V2">
     <style>
       #hero-skeleton { aspect-ratio: 16/9; }
       @media (max-width: 768px) { #hero-skeleton { aspect-ratio: 9/16; } }
