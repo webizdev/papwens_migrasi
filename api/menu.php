@@ -43,6 +43,7 @@ switch ($method) {
         if (!$success) {
             sendJSON(['error' => 'Database error: ' . $db->error], 500);
         }
+        @unlink(__DIR__ . '/../uploads/settings_cache.json');
         sendJSON(['success' => true, 'id' => $db->insert_id]);
         break;
 
