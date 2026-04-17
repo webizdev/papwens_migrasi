@@ -577,7 +577,7 @@ $seoTitle = $siteName . " - " . ($webData['heroTitleMain'] ?? 'Artisan Bakery & 
       });
     </script>
 
-    <script type="module" crossorigin src="/assets/index-DU-yLjgB.js" defer></script>
+    <script type="module" crossorigin src="/assets/index-DU-yLjgB.js?v=1776467335375" defer></script>
     <link rel="stylesheet" crossorigin href="/assets/index-fjww86zz.css">
     <style>
       #hero-skeleton { aspect-ratio: 16/9; }
