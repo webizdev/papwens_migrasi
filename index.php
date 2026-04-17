@@ -5,23 +5,76 @@ $db = getDB();
 // 0. Simple File Cache for DB results
 $cacheFile = __DIR__ . '/uploads/settings_cache.json';
 $cacheTime = 300; // 5 minutes
-$webData = []; $contact = [];
+$webData = []; $contact = []; $menuData = []; $galleryData = []; $testimonialsData = [];
 
 if (file_exists($cacheFile) && (time() - filemtime($cacheFile) < $cacheTime)) {
     $cacheData = json_decode(file_get_contents($cacheFile), true);
     $webData = $cacheData['web'] ?? [];
     $contact = $cacheData['contact'] ?? [];
+    $menuData = $cacheData['menu'] ?? [];
+    $galleryData = $cacheData['gallery'] ?? [];
+    $testimonialsData = $cacheData['testimonials'] ?? [];
 } else {
     // Fetch Web Settings
     $webRes = $db->query("SELECT value FROM papwens_settings WHERE `key`='web_settings' LIMIT 1");
     $webData = $webRes ? json_decode($webRes->fetch_assoc()['value'], true) : [];
-
+    
     // Fetch Contact Settings
     $contactRes = $db->query("SELECT * FROM papwens_contacts WHERE id=1 LIMIT 1");
-    $contact = $contactRes ? $contactRes->fetch_assoc() : [];
-    
+    $contactRow = $contactRes ? $contactRes->fetch_assoc() : [];
+    $contact = [];
+    if ($contactRow) {
+        $contact['address'] = $contactRow['address'] ?? '';
+        $contact['whatsapp'] = $contactRow['whatsapp'] ?? '';
+        $contact['email'] = $contactRow['email'] ?? '';
+        $contact['mapsUrl'] = $contactRow['maps_url'] ?? '';
+        $contact['mapsEmbed'] = $contactRow['maps_embed'] ?? '';
+        $contact['socialMedia'] = !empty($contactRow['social_media']) ? json_decode($contactRow['social_media'], true) : [];
+        
+        if (isset($webData['contactSubtitle'])) {
+            $addrShort = explode(',', $contactRow['address'])[0];
+            $webData['contactSubtitle'] = "Pesan langsung via WhatsApp (" . $contactRow['whatsapp'] . ") atau kunjungi kami di " . $addrShort . ". Kami siap menyajikan yang terbaik untuk Anda.";
+        }
+        $webData['dynamic_contact'] = [
+            'whatsapp' => $contactRow['whatsapp'] ?? '',
+            'address'  => $contactRow['address'] ?? '',
+            'email'    => $contactRow['email'] ?? '',
+            'mapsUrl'  => $contactRow['maps_url'] ?? ''
+        ];
+    }
+    // Fetch Menu
+    $menuRes = $db->query("SELECT * FROM papwens_menu_items ORDER BY category, id DESC");
+    if($menuRes) while($r = $menuRes->fetch_assoc()) { 
+        $menuData[] = [
+            'id'           => (int)$r['id'],
+            'name'         => $r['name'],
+            'description'  => $r['description'],
+            'price'        => $r['price'],
+            'numericPrice' => (int)$r['numeric_price'],
+            'category'     => $r['category'],
+            'image'        => $r['image'],
+            'badge'        => $r['badge'],
+            'stock'        => (int)$r['stock']
+        ];
+    }
+
+    // Fetch Gallery
+    $galleryRes = $db->query("SELECT * FROM papwens_gallery_images ORDER BY id ASC");
+    if($galleryRes) while($r = $galleryRes->fetch_assoc()) { 
+        $r['id'] = (int)$r['id']; $galleryData[] = $r; 
+    }
+
+    // Fetch Testimonials
+    $testiRes = $db->query("SELECT * FROM papwens_testimonials ORDER BY id ASC");
+    if($testiRes) while($r = $testiRes->fetch_assoc()) { 
+        $r['id'] = (int)$r['id']; $r['stars'] = (int)$r['stars']; $testimonialsData[] = $r; 
+    }
+
     // Save to cache
-    file_put_contents($cacheFile, json_encode(['web' => $webData, 'contact' => $contact]));
+    file_put_contents($cacheFile, json_encode([
+        'web' => $webData, 'contact' => $contact, 
+        'menu' => $menuData, 'gallery' => $galleryData, 'testimonials' => $testimonialsData
+    ]));
 }
 
 /**
@@ -166,9 +219,32 @@ $seoTitle = $siteName . " - " . ($webData['heroTitleMain'] ?? 'Artisan Bakery & 
     
     <script>
       /**
-       * PAPWENS TOTAL SYNC ENGINE
-       * This object is consumed by the React app and used for surgical hydration
+       * ZERO-DELAY HYDRATION ENGINE
+       * Extremely fast preloaded cache + fetch interceptor
        */
+      window.PAPWENS_DB_CACHE = {
+        "/api/menu": <?php echo json_encode($menuData); ?>,
+        "/api/gallery": <?php echo json_encode($galleryData); ?>,
+        "/api/testimonials": <?php echo json_encode($testimonialsData); ?>,
+        "/api/settings/web": <?php echo json_encode($webData); ?>,
+        "/api/settings/contact": <?php echo json_encode($contact); ?>
+      };
+
+      // Intercept fetch API to instantly fulfill React's data requests without network delay
+      const originalFetch = window.fetch;
+      window.fetch = async function(url, options) {
+         if (!options || !options.method || options.method === 'GET') {
+            const apiPath = typeof url === 'string' ? url.split('?')[0] : '';
+            if (window.PAPWENS_DB_CACHE[apiPath]) {
+               return new Response(JSON.stringify(window.PAPWENS_DB_CACHE[apiPath]), {
+                  status: 200,
+                  headers: { 'Content-Type': 'application/json' }
+               });
+            }
+         }
+         return originalFetch.apply(this, arguments);
+      };
+
       window.PAPWENS_CONFIG = { 
         whatsapp: '<?php echo $whatsapp; ?>',
         siteName: '<?php echo addslashes($siteName); ?>',
@@ -177,6 +253,32 @@ $seoTitle = $siteName . " - " . ($webData['heroTitleMain'] ?? 'Artisan Bakery & 
         settings: <?php echo json_encode($webData); ?>,
         contact: <?php echo json_encode($contact); ?>
       };
+      
+      window.PAPWENS_MENU_DATA = window.PAPWENS_DB_CACHE["/api/menu"];
+      window.PAPWENS_GALLERY_DATA = window.PAPWENS_DB_CACHE["/api/gallery"];
+
+      // 14. Sync Logic for Categories (Menu & Gallery)
+      function syncAllCategories() {
+         const isHome = window.location.pathname === '/' || window.location.pathname === '' || window.location.pathname.includes('index.php');
+         if (!isHome) return;
+
+         // Sync Gallery Items (Images)
+         document.querySelectorAll('img[alt], div[style*="background-image"]').forEach(el => {
+            if (el.dataset.categorySynced) return;
+            
+            // For Gallery, items usually have a title or alt text
+            const text = (el.alt || el.innerText || '').toLowerCase();
+            const match = (window.PAPWENS_GALLERY_DATA || []).find(m => text.includes(m.title.toLowerCase()));
+            
+            if (match) {
+               // Tag the container or the element itself
+               const container = el.closest('.relative') || el.parentElement;
+               container.dataset.category = match.category;
+               container.dataset.galleryTag = "true";
+               container.dataset.categorySynced = "true";
+            }
+         });
+      }
 
       // Surgical Hydration (overwriting hardcoded DOM elements)
       function hydrateDynamicData() {
@@ -184,6 +286,70 @@ $seoTitle = $siteName . " - " . ($webData['heroTitleMain'] ?? 'Artisan Bakery & 
         if (!config) return;
         const settings = config.settings || {};
         const contact = config.contact || {};
+
+        // 13. Gallery Page Category Pill Injection ("Bakery")
+        const isGalleryHome = window.location.pathname === '/' || window.location.pathname === '' || window.location.pathname.includes('index.php');
+        if (isGalleryHome) {
+           const potentialAmbiance = Array.from(document.querySelectorAll('button, div, span')).find(el => {
+              return el.children.length === 0 && el.innerText.trim() === 'Ambiance';
+           });
+
+           if (potentialAmbiance) {
+              const container = potentialAmbiance.parentElement;
+              const allPill = Array.from(container.children).find(child => child.innerText.trim() === 'All');
+              
+              if (allPill && !container.querySelector('[data-bakery-pill]')) {
+                 const bakeryPill = potentialAmbiance.cloneNode(true);
+                 bakeryPill.innerText = 'Bakery';
+                 bakeryPill.dataset.bakeryPill = "true";
+                 bakeryPill.style.cursor = 'pointer';
+                 bakeryPill.classList.remove('bg-espresso', 'text-white', 'active');
+                 
+                 bakeryPill.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    allPill.click();
+                    
+                    const applyFilter = () => {
+                        document.querySelectorAll('[data-gallery-tag]').forEach(item => {
+                           const cat = (item.dataset.category || '').toLowerCase();
+                           if (cat === 'bakery') {
+                              item.style.display = 'block';
+                              item.style.opacity = '1';
+                           } else {
+                              item.style.display = 'none';
+                           }
+                        });
+                        
+                        Array.from(container.children).forEach(p => {
+                           p.classList.remove('bg-espresso', 'text-white', 'active');
+                           if (!p.classList.contains('bg-warm-white')) p.classList.add('bg-warm-white');
+                           if (!p.classList.contains('text-text-secondary')) p.classList.add('text-text-secondary');
+                        });
+                        bakeryPill.classList.add('bg-espresso', 'text-white', 'active');
+                        bakeryPill.classList.remove('bg-warm-white', 'text-text-secondary');
+                    };
+
+                    setTimeout(applyFilter, 100);
+                    setTimeout(applyFilter, 300);
+                 };
+
+                 Array.from(container.children).forEach(p => {
+                    if (p !== bakeryPill) {
+                       p.addEventListener('click', () => {
+                          bakeryPill.classList.remove('bg-espresso', 'text-white', 'active');
+                          document.querySelectorAll('[data-gallery-tag]').forEach(item => {
+                             item.style.display = '';
+                             item.style.opacity = '';
+                          });
+                       });
+                    }
+                 });
+
+                 container.appendChild(bakeryPill);
+              }
+           }
+        }
         
         // Helper to force WebP in JS
         const toWebp = (url) => url ? url.replace(/\.(png|jpg|jpeg)$/i, '.webp') : '';
@@ -362,6 +528,36 @@ $seoTitle = $siteName . " - " . ($webData['heroTitleMain'] ?? 'Artisan Bakery & 
               if (el.textContent.trim().toUpperCase() === 'ESTABLISHED') el.textContent = 'EXPERIENCE';
            }
         });
+
+        // 12. Dynamic Admin Categories Sync (MySQL Source)
+        if (window.location.pathname.includes('/admin')) {
+           const catSelect = Array.from(document.querySelectorAll('select')).find(el => {
+              const label = el.closest('div')?.querySelector('label');
+              return label && label.innerText.toLowerCase().includes('kategori');
+           });
+
+           if (catSelect && !catSelect.dataset.synced) {
+              catSelect.dataset.synced = "true";
+              const currentVal = catSelect.value;
+              fetch('/api/menu.php?t=' + Date.now())
+                 .then(r => r.json())
+                 .then(items => {
+                    const dbCats = [...new Set(items.map(i => i.category))].filter(Boolean);
+                    const defaults = ['Sourdough', 'Pastry', 'Coffee', 'Atmosphere'];
+                    const allCats = [...new Set([...defaults, ...dbCats])].sort();
+                    
+                    catSelect.innerHTML = '';
+                    allCats.forEach(cat => {
+                       const opt = document.createElement('option');
+                       opt.value = cat;
+                       opt.textContent = cat;
+                       if (cat === currentVal) opt.selected = true;
+                       catSelect.appendChild(opt);
+                    });
+                 }).catch(e => { catSelect.dataset.synced = ""; });
+           }
+        }
+
       }
 
       // HIGH PERFORMANCE DEBOUNCED OBSERVER
@@ -371,6 +567,7 @@ $seoTitle = $siteName . " - " . ($webData['heroTitleMain'] ?? 'Artisan Bakery & 
         if (hydrationTimeout) clearTimeout(hydrationTimeout);
         hydrationTimeout = setTimeout(() => {
            hydrateDynamicData();
+           syncAllCategories();
         }, 100);
       });
 
