@@ -96,7 +96,7 @@ $whatsapp = preg_replace('/[^0-9]/', '', $whatsappFull);
 $theme = !empty($webData['theme']) ? $webData['theme'] : 'yellow-black';
 
 // Helper for SEO Title
-$seoTitle = $siteName . " - " . ($webData['heroTitleMain'] ?? 'Artisan BAKERY & Specialty COFFEE');
+$seoTitle = $siteName . " - " . ($webData['heroTitleMain'] ?? 'Artisan Bakery & Specialty Coffee');
 ?>
 <!doctype html>
 <html lang="en">
@@ -121,7 +121,7 @@ $seoTitle = $siteName . " - " . ($webData['heroTitleMain'] ?? 'Artisan BAKERY & 
     <title><?php echo htmlspecialchars($seoTitle); ?></title>
     
     <?php
-      $metaDesc = !empty($webData['metaDescription']) ? $webData['metaDescription'] : "Artisan BAKERY & Specialty COFFEE di Bandung. Nikmati Freshly Baked Bread, PASTRY, dan Kopi Pilihan setiap hari di Papwens.";
+      $metaDesc = !empty($webData['metaDescription']) ? $webData['metaDescription'] : "Artisan Bakery & Specialty Coffee di Bandung. Nikmati Freshly Baked Bread, Pastry, dan Kopi Pilihan setiap hari di Papwens.";
       $metaKeys = !empty($webData['metaKeywords']) ? $webData['metaKeywords'] : "bakery bandung, cafe bandung, artisan bakery, specialty coffee, papwens bandung, pastry bandung";
       $currentUrl = "https://papwens.com" . $_SERVER['REQUEST_URI'];
       $ogImageStatic = "/assets/og.png"; // User specified OG image
@@ -140,13 +140,6 @@ $seoTitle = $siteName . " - " . ($webData['heroTitleMain'] ?? 'Artisan BAKERY & 
         font-family: 'Inter', sans-serif; overflow-x: hidden !important; width: 100% !important; 
         position: relative !important; max-width: 100vw !important; -webkit-overflow-scrolling: touch;
       }
-      /* Custom Pills & Hiding Original Filters */
-      #menu [class*="scrollbar-hide"][class*="snap-x"], 
-      #gallery [class*="scrollbar-hide"][class*="snap-x"] { display: none !important; }
-      .custom-p-active { background-color: #3d2b1f !important; color: white !important; }
-      .custom-p-inactive { color: #6b7280 !important; }
-      .custom-p-inactive:hover { color: #3d2b1f !important; }
-      
       #root, main, section, footer, .app-container { 
         overflow-x: hidden !important; width: 100% !important; max-width: 100% !important; 
         position: relative !important; box-sizing: border-box !important;
@@ -190,7 +183,7 @@ $seoTitle = $siteName . " - " . ($webData['heroTitleMain'] ?? 'Artisan BAKERY & 
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": ["BAKERY", "Cafe", "FoodEstablishment"],
+      "@type": ["Bakery", "Cafe", "FoodEstablishment"],
       "name": "<?php echo addslashes($siteName); ?>",
       "image": "<?php echo htmlspecialchars($ogImage); ?>",
       "@id": "https://papwens.com",
@@ -294,7 +287,7 @@ $seoTitle = $siteName . " - " . ($webData['heroTitleMain'] ?? 'Artisan BAKERY & 
         const settings = config.settings || {};
         const contact = config.contact || {};
 
-        // 13. Gallery Page Category Pill Injection ("BAKERY")
+        // 13. Gallery Page Category Pill Injection ("Bakery")
         const isGalleryHome = window.location.pathname === '/' || window.location.pathname === '' || window.location.pathname.includes('index.php');
         if (isGalleryHome) {
            const potentialAmbiance = Array.from(document.querySelectorAll('button, div, span')).find(el => {
@@ -303,11 +296,11 @@ $seoTitle = $siteName . " - " . ($webData['heroTitleMain'] ?? 'Artisan BAKERY & 
 
            if (potentialAmbiance) {
               const container = potentialAmbiance.parentElement;
-              const allPill = Array.from(container.children).find(child => child.innerText.trim() === 'ALL');
+              const allPill = Array.from(container.children).find(child => child.innerText.trim() === 'All');
               
               if (allPill && !container.querySelector('[data-bakery-pill]')) {
                  const bakeryPill = potentialAmbiance.cloneNode(true);
-                 bakeryPill.innerText = 'BAKERY';
+                 bakeryPill.innerText = 'Bakery';
                  bakeryPill.dataset.bakeryPill = "true";
                  bakeryPill.style.cursor = 'pointer';
                  bakeryPill.classList.remove('bg-espresso', 'text-white', 'active');
@@ -398,7 +391,7 @@ $seoTitle = $siteName . " - " . ($webData['heroTitleMain'] ?? 'Artisan BAKERY & 
         // 4. Hero Section Sync
         if (settings.heroTitleMain) {
            document.querySelectorAll('h1').forEach(h1 => {
-              if (h1.id === 'hero-title' || (h1.textContent.includes('BAKERY') && !h1.dataset.hydrated)) {
+              if (h1.id === 'hero-title' || (h1.textContent.includes('Bakery') && !h1.dataset.hydrated)) {
                  h1.textContent = settings.heroTitleMain;
                  h1.dataset.hydrated = "true";
               }
@@ -524,7 +517,7 @@ $seoTitle = $siteName . " - " . ($webData['heroTitleMain'] ?? 'Artisan BAKERY & 
               if (src.includes('logo')) img.alt = config.siteName + ' Logo';
               else if (img.closest('nav')) img.alt = config.siteName + ' Navigation Icon';
               else if (img.closest('footer')) img.alt = config.siteName + ' Footer Branding';
-              else if (src.includes('hero')) img.alt = 'Artisan BAKERY & Specialty COFFEE at ' + config.siteName;
+              else if (src.includes('hero')) img.alt = 'Artisan Bakery & Specialty Coffee at ' + config.siteName;
               else if (src.includes('about')) img.alt = 'Our Story - ' + config.siteName;
               else img.alt = 'Freshly Baked ' + config.siteName + ' Product';
            }
@@ -556,202 +549,7 @@ $seoTitle = $siteName . " - " . ($webData['heroTitleMain'] ?? 'Artisan BAKERY & 
                  .then(r => r.json())
                  .then(items => {
                     const dbCats = [...new Set(items.map(i => i.category))].filter(Boolean);
-                    const defaults = ['SOURDOUGH', 'PASTRY', 'COFFEE', 'Atmosphere'];
-                    const allCats = [...new Set([...defaults, ...dbCats])].sort();
-                    
-                    catSelect.innerHTML = '';
-                    allCats.forEach(cat => {
-                       const opt = document.createElement('option');
-                       opt.value = cat;
-                       opt.textContent = cat;
-                       if (cat === currentVal) opt.selected = true;
-                       catSelect.appendChild(opt);
-                    });
-                 }).catch(e => { catSelect.dataset.synced = ""; });
-           }
-        }
-
-      }
-
-      // HIGH PERFORMANCE DEBOUNCED OBSERVER
-      // Instead of running every mutation, we wait 100ms for React to settle
-          document.querySelectorAll('nav img, footer img, .logo img, [class*="footer"] img, img[alt*="logo"], img[alt*="Papwens"]').forEach(img => {
-             if (!img.dataset.hydrated) {
-                img.src = optLogo;
-                img.dataset.hydrated = "true";
-             }
-          });
-        }
-
-        // 3. Navigation & Title Highlights
-        if (config.siteName) {
-           document.querySelectorAll('.site-name, .brand-name').forEach(el => {
-             if (el.textContent !== config.siteName) el.textContent = config.siteName;
-           });
-        }
-
-        // 4. Hero Section Sync
-        if (settings.heroTitleMain) {
-           document.querySelectorAll('h1').forEach(h1 => {
-              if (h1.id === 'hero-title' || (h1.textContent.includes('BAKERY') && !h1.dataset.hydrated)) {
-                 h1.textContent = settings.heroTitleMain;
-                 h1.dataset.hydrated = "true";
-              }
-           });
-        }
-
-        // 6. Social Media Sync
-        if (contact.social_media) {
-           try {
-              const social = JSON.parse(contact.social_media);
-              social.forEach(item => {
-                 document.querySelectorAll(`a[href*="${item.platform.toLowerCase()}"]`).forEach(a => {
-                    if (a.href !== item.url) a.href = item.url;
-                 });
-              });
-           } catch(e) {}
-        }
-
-        // 7. Dynamic Images (Hero, About, etc)
-        if (settings.heroImage) {
-           const optHero = toWebp(settings.heroImage);
-           document.querySelectorAll('.hero-bg, .hero-image, #hero-skeleton').forEach(el => {
-              if (el.dataset.hydrated_img) return;
-              if (el.tagName === 'IMG') el.src = optHero;
-              else el.style.backgroundImage = `url("${optHero}")`;
-              el.dataset.hydrated_img = "true";
-           });
-        }
-        if (settings.aboutImage) {
-           const optAbout = toWebp(settings.aboutImage);
-           document.querySelectorAll('.about-image, img[alt*="About"]').forEach(img => {
-              if (!img.dataset.hydrated_img) {
-                img.src = optAbout;
-                img.dataset.hydrated_img = "true";
-              }
-           });
-        }
-
-        // 8. Map Sanitizer & Badge Shield (Preventing Mobile Gap)
-        document.querySelectorAll('iframe[src*="google.com/maps"]').forEach(iframe => {
-           if (!iframe.dataset.sanitized) {
-              iframe.style.width = '100%';
-              iframe.style.maxWidth = '100vw';
-              iframe.removeAttribute('width');
-              iframe.dataset.sanitized = "true";
-           }
-        });
-
-        // Badge Shield: Ensure rotating elements don't overflow
-        document.querySelectorAll('[class*="natural"], [class*="badge"], [class*="animate"]').forEach(el => {
-           if (el.offsetWidth > window.innerWidth) {
-              el.style.maxWidth = '100vw';
-              el.style.overflow = 'hidden';
-           }
-        });
-
-        // 8. Admin Dashboard Patch: Hapus Logo (Only on /admin)
-        if (window.location.pathname.includes('/admin')) {
-          const webSettingsForm = document.querySelector('form') || document.querySelector('#root');
-          if (webSettingsForm && (document.body.innerText.includes('Web Settings') || document.body.innerText.includes('Identitas'))) {
-             const logoSection = Array.from(document.querySelectorAll('label')).find(l => l.innerText.includes('Logo'));
-             if (logoSection && !document.getElementById('papwens-del-logo-btn')) {
-                const btn = document.createElement('button');
-                btn.id = 'papwens-del-logo-btn';
-                btn.type = 'button';
-                btn.innerText = 'X Hapus Logo';
-                btn.style = 'margin-left:10px; padding:4px 8px; background:#ff4444; color:white; border:none; border-radius:4px; cursor:pointer; font-size:12px;';
-                btn.onclick = async () => {
-                   if (!confirm('Hapus logo website?')) return;
-                   const newSettings = {...config.settings, siteLogo: ""};
-                   try {
-                     const resp = await fetch('/api/settings/web', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(newSettings)
-                     });
-                     if (resp.ok) {
-                        alert('Logo berhasil dihapus! Halaman akan dimuat ulang.');
-                        window.location.reload();
-                     }
-                   } catch(e) { alert('Gagal menghapus logo: ' + e); }
-                };
-                logoSection.appendChild(btn);
-             }
-          }
-        }
-
-        // 9. Footer Text-to-Logo Replacement & Fallback
-        const footer = document.querySelector('footer') || document.querySelector('[class*="footer"]');
-        if (footer) {
-          const siteNameDisplay = config.siteName || 'PAPWENS';
-          const brandArea = Array.from(footer.querySelectorAll('h1, h2, h3, h4, h5, div, span, a, p'))
-             .find(el => {
-                const txt = el.textContent.trim().toLowerCase();
-                const siteName = (config.siteName || '').toLowerCase();
-                // Ensure we only match the main logo area, NOT the copyright text
-                return el.children.length <= 1 && (txt === siteName || txt === 'papwens' || el.querySelector('img[alt*="logo"]'));
-             });
-
-          if (brandArea && !brandArea.dataset.hydrated) {
-             if (config.logo && config.logo !== '') {
-                if (!brandArea.querySelector('img')) {
-                   const img = document.createElement('img');
-                   img.src = config.logo;
-                   img.alt = siteNameDisplay;
-                   img.style = 'height: 48px; width: auto; margin-bottom: 20px; display: block; object-fit: contain;';
-                   brandArea.innerHTML = ''; 
-                   brandArea.appendChild(img);
-                }
-             } else {
-                brandArea.innerHTML = '';
-                brandArea.textContent = siteNameDisplay;
-                brandArea.style = 'font-family: "Playfair Display", serif; font-size: 24px; font-weight: 700; color: white; display: block; margin-bottom: 20px;';
-             }
-             brandArea.dataset.hydrated = "true";
-          }
-        }
-
-        // 10. Image SEO (ALT tags)
-        document.querySelectorAll('img').forEach(img => {
-           const src = img.src.toLowerCase();
-           if (!img.alt || img.alt === '' || img.alt.includes('dummy') || img.alt.includes('Placeholder')) {
-              if (src.includes('logo')) img.alt = config.siteName + ' Logo';
-              else if (img.closest('nav')) img.alt = config.siteName + ' Navigation Icon';
-              else if (img.closest('footer')) img.alt = config.siteName + ' Footer Branding';
-              else if (src.includes('hero')) img.alt = 'Artisan BAKERY & Specialty COFFEE at ' + config.siteName;
-              else if (src.includes('about')) img.alt = 'Our Story - ' + config.siteName;
-              else img.alt = 'Freshly Baked ' + config.siteName + ' Product';
-           }
-        });
-
-        // 11. Branding Update: "2021 Established" -> "25+ experience"
-        const findAndReplaceText = (root) => {
-           const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false);
-           let node;
-           while (node = walker.nextNode()) {
-              const text = node.nodeValue;
-              if (text && text.trim() === '2021') node.nodeValue = '25+';
-              if (text && text.trim().toUpperCase() === 'ESTABLISHED') node.nodeValue = 'EXPERIENCE';
-           }
-        };
-        findAndReplaceText(document.body);
-
-        // 12. Dynamic Admin Categories Sync (MySQL Source)
-        if (window.location.pathname.includes('/admin')) {
-           const catSelect = Array.from(document.querySelectorAll('select')).find(el => {
-              const label = el.closest('div')?.querySelector('label');
-              return label && label.innerText.toLowerCase().includes('kategori');
-           });
-
-           if (catSelect && !catSelect.dataset.synced) {
-              catSelect.dataset.synced = "true";
-              const currentVal = catSelect.value;
-              fetch('/api/menu.php?t=' + Date.now())
-                 .then(r => r.json())
-                 .then(items => {
-                    const dbCats = [...new Set(items.map(i => i.category))].filter(Boolean);
-                    const defaults = ['SOURDOUGH', 'PASTRY', 'COFFEE', 'Atmosphere'];
+                    const defaults = ['Sourdough', 'Pastry', 'Coffee', 'Atmosphere'];
                     const allCats = [...new Set([...defaults, ...dbCats])].sort();
                     
                     catSelect.innerHTML = '';
@@ -775,78 +573,8 @@ $seoTitle = $siteName . " - " . ($webData['heroTitleMain'] ?? 'Artisan BAKERY & 
         if (hydrationTimeout) clearTimeout(hydrationTimeout);
         hydrationTimeout = setTimeout(() => {
            hydrateDynamicData();
-           injectPillsSurgically();
+           syncAllCategories();
         }, 100);
-      });
-
-      // --- SURGICAL PILL INJECTION (HYDRATION RESISTANT) ---
-      const CUSTOM_PILLS_HTML = `
-        <div class="custom-filter-bar -webkit-scrollbar scrollbar-hide flex space-x-2 p-1 bg-warm-white rounded-full snap-x snap-mandatory mb-8 mx-auto w-max max-w-full overflow-x-auto">
-          <button data-cat="ALL" class="custom-p px-6 py-2 md:px-8 md:py-3 rounded-full text-xs md:text-sm font-semibold transition-all whitespace-nowrap flex-shrink-0 snap-center custom-p-active bg-espresso text-white shadow-custom-md">ALL</button>
-          <button data-cat="BAKERY" class="custom-p px-6 py-2 md:px-8 md:py-3 rounded-full text-xs md:text-sm font-semibold transition-all whitespace-nowrap flex-shrink-0 snap-center custom-p-inactive text-text-secondary hover:text-espresso">BAKERY</button>
-          <button data-cat="COFFEE" class="custom-p px-6 py-2 md:px-8 md:py-3 rounded-full text-xs md:text-sm font-semibold transition-all whitespace-nowrap flex-shrink-0 snap-center custom-p-inactive text-text-secondary hover:text-espresso">COFFEE</button>
-          <button data-cat="NON-COFFEE" class="custom-p px-6 py-2 md:px-8 md:py-3 rounded-full text-xs md:text-sm font-semibold transition-all whitespace-nowrap flex-shrink-0 snap-center custom-p-inactive text-text-secondary hover:text-espresso">NON-COFFEE</button>
-          <button data-cat="PASTRY" class="custom-p px-6 py-2 md:px-8 md:py-3 rounded-full text-xs md:text-sm font-semibold transition-all whitespace-nowrap flex-shrink-0 snap-center custom-p-inactive text-text-secondary hover:text-espresso">PASTRY</button>
-          <button data-cat="SOURDOUGH" class="custom-p px-6 py-2 md:px-8 md:py-3 rounded-full text-xs md:text-sm font-semibold transition-all whitespace-nowrap flex-shrink-0 snap-center custom-p-inactive text-text-secondary hover:text-espresso">SOURDOUGH</button>
-        </div>`;
-
-      function injectPillsSurgically() {
-        ['menu', 'gallery'].forEach(sid => {
-          const section = document.getElementById(sid);
-          if (!section) return;
-
-          // Find anchor for injection (Header or subtitle)
-          const anchor = Array.from(section.querySelectorAll('h2, p')).find(el => {
-             const t = el.textContent.toLowerCase();
-             return t.includes('menu') || t.includes('gallery') || t.includes('freshly') || t.includes('capturing');
-          });
-
-          if (anchor && !section.querySelector('.custom-filter-bar')) {
-             anchor.insertAdjacentHTML('afterend', CUSTOM_PILLS_HTML);
-          }
-
-          // Hide original React bar
-          const originalContainer = Array.from(section.querySelectorAll('div')).find(div => 
-             Array.from(div.querySelectorAll('button')).some(b => b.textContent.trim().toLowerCase() === 'all' && !b.hasAttribute('data-cat'))
-          );
-          if (originalContainer) originalContainer.style.display = 'none';
-        });
-      }
-
-      // Safe Click Delegation for Custom Pills
-      document.addEventListener('click', (e) => {
-        const btn = e.target.closest('[data-cat]');
-        if (!btn) return;
-        const cat = btn.getAttribute('data-cat');
-        
-        // Sync Visual State
-        document.querySelectorAll('[data-cat]').forEach(b => {
-          if (b.getAttribute('data-cat') === cat) {
-            b.classList.add('custom-p-active', 'bg-espresso', 'text-white', 'shadow-custom-md');
-            b.classList.remove('custom-p-inactive', 'text-text-secondary');
-          } else {
-            b.classList.remove('custom-p-active', 'bg-espresso', 'text-white', 'shadow-custom-md');
-            b.classList.add('custom-p-inactive', 'text-text-secondary');
-          }
-        });
-
-        // Trigger Hidden React Button
-        ['menu', 'gallery'].forEach(sid => {
-           const section = document.getElementById(sid);
-           if (section) {
-              const originalContainer = Array.from(section.querySelectorAll('div')).find(div => 
-                Array.from(div.querySelectorAll('button')).some(b => b.textContent.trim().toLowerCase() === 'all' && !b.hasAttribute('data-cat'))
-              );
-              if (originalContainer) {
-                 const targetCat = cat.toLowerCase();
-                 const origMatch = Array.from(originalContainer.querySelectorAll('button')).find(ob => {
-                    const txt = ob.textContent.trim().toLowerCase();
-                    return txt === targetCat || (targetCat === 'non-coffee' && txt.includes('non'));
-                 });
-                 if (origMatch) origMatch.click();
-              }
-           }
-        });
       });
 
       window.addEventListener('DOMContentLoaded', () => {
@@ -855,8 +583,8 @@ $seoTitle = $siteName . " - " . ($webData['heroTitleMain'] ?? 'Artisan BAKERY & 
       });
     </script>
 
-    <script type="module" crossorigin src="/assets/index-DU-yLjgB.js?v=BUILD_2026_04_18_V19" defer></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-fjww86zz.css?v=BUILD_2026_04_18_V19">
+    <script type="module" crossorigin src="/assets/index-DU-yLjgB.js?v=BUILD_2026_04_18_V15" defer></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-fjww86zz.css?v=BUILD_2026_04_18_V15">
     <style>
       #hero-skeleton { aspect-ratio: 16/9; }
       @media (max-width: 768px) { #hero-skeleton { aspect-ratio: 9/16; } }
@@ -869,36 +597,11 @@ $seoTitle = $siteName . " - " . ($webData['heroTitleMain'] ?? 'Artisan BAKERY & 
           <img src="<?php echo htmlspecialchars($siteLogoOptimized); ?>" alt="<?php echo htmlspecialchars($siteName); ?>" class="site-logo" height="40">
           <div id="skeleton-burger" style="width: 30px; height: 30px; border-radius: 50%; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);"></div>
        </header>
-
         <main>
-          <section id="menu-skeleton" style="padding: 60px 20px; text-align: center;">
-            <h2 style="font-family: 'Playfair Display', serif; font-size: 32px; margin-bottom: 30px;">Our Menu</h2>
-            
-            <div class="custom-filter-bar -webkit-scrollbar scrollbar-hide flex space-x-2 p-1 bg-warm-white rounded-full snap-x snap-mandatory mb-8 mx-auto w-max max-w-full overflow-x-auto">
-              <button data-cat="ALL" class="custom-p px-6 py-2 md:px-8 md:py-3 rounded-full text-xs md:text-sm font-semibold transition-all whitespace-nowrap flex-shrink-0 snap-center custom-p-active bg-espresso text-white shadow-custom-md">ALL</button>
-              <button data-cat="BAKERY" class="custom-p px-6 py-2 md:px-8 md:py-3 rounded-full text-xs md:text-sm font-semibold transition-all whitespace-nowrap flex-shrink-0 snap-center custom-p-inactive text-text-secondary hover:text-espresso">BAKERY</button>
-              <button data-cat="COFFEE" class="custom-p px-6 py-2 md:px-8 md:py-3 rounded-full text-xs md:text-sm font-semibold transition-all whitespace-nowrap flex-shrink-0 snap-center custom-p-inactive text-text-secondary hover:text-espresso">COFFEE</button>
-              <button data-cat="Non-COFFEE" class="custom-p px-6 py-2 md:px-8 md:py-3 rounded-full text-xs md:text-sm font-semibold transition-all whitespace-nowrap flex-shrink-0 snap-center custom-p-inactive text-text-secondary hover:text-espresso">Non-COFFEE</button>
-              <button data-cat="PASTRY" class="custom-p px-6 py-2 md:px-8 md:py-3 rounded-full text-xs md:text-sm font-semibold transition-all whitespace-nowrap flex-shrink-0 snap-center custom-p-inactive text-text-secondary hover:text-espresso">PASTRY</button>
-              <button data-cat="SOURDOUGH" class="custom-p px-6 py-2 md:px-8 md:py-3 rounded-full text-xs md:text-sm font-semibold transition-all whitespace-nowrap flex-shrink-0 snap-center custom-p-inactive text-text-secondary hover:text-espresso">SOURDOUGH</button>
-            </div>
-          </section>
-          <section id="gallery-skeleton" style="padding: 60px 20px; text-align: center;">
-            <h2 style="font-family: 'Playfair Display', serif; font-size: 32px; margin-bottom: 30px;">Gallery</h2>
-            
-            <div class="custom-filter-bar -webkit-scrollbar scrollbar-hide flex space-x-2 p-1 bg-warm-white rounded-full snap-x snap-mandatory mb-8 mx-auto w-max max-w-full overflow-x-auto">
-              <button data-cat="ALL" class="custom-p px-6 py-2 md:px-8 md:py-3 rounded-full text-xs md:text-sm font-semibold transition-all whitespace-nowrap flex-shrink-0 snap-center custom-p-active bg-espresso text-white shadow-custom-md">ALL</button>
-              <button data-cat="BAKERY" class="custom-p px-6 py-2 md:px-8 md:py-3 rounded-full text-xs md:text-sm font-semibold transition-all whitespace-nowrap flex-shrink-0 snap-center custom-p-inactive text-text-secondary hover:text-espresso">BAKERY</button>
-              <button data-cat="COFFEE" class="custom-p px-6 py-2 md:px-8 md:py-3 rounded-full text-xs md:text-sm font-semibold transition-all whitespace-nowrap flex-shrink-0 snap-center custom-p-inactive text-text-secondary hover:text-espresso">COFFEE</button>
-              <button data-cat="Non-COFFEE" class="custom-p px-6 py-2 md:px-8 md:py-3 rounded-full text-xs md:text-sm font-semibold transition-all whitespace-nowrap flex-shrink-0 snap-center custom-p-inactive text-text-secondary hover:text-espresso">Non-COFFEE</button>
-              <button data-cat="PASTRY" class="custom-p px-6 py-2 md:px-8 md:py-3 rounded-full text-xs md:text-sm font-semibold transition-all whitespace-nowrap flex-shrink-0 snap-center custom-p-inactive text-text-secondary hover:text-espresso">PASTRY</button>
-              <button data-cat="SOURDOUGH" class="custom-p px-6 py-2 md:px-8 md:py-3 rounded-full text-xs md:text-sm font-semibold transition-all whitespace-nowrap flex-shrink-0 snap-center custom-p-inactive text-text-secondary hover:text-espresso">SOURDOUGH</button>
-            </div>
-          </section>
           <section id="hero-skeleton" style="height: 100vh; display: flex; align-items: center; justify-content: center; background: #111 url('<?php echo htmlspecialchars($heroImageOptimized); ?>') center/cover no-repeat; color: white; text-align: center; padding: 20px; position: relative;">
              <div style="position: absolute; inset: 0; background: rgba(0,0,0,0.4); z-index: 1;"></div>
              <div style="position: relative; z-index: 2;">
-                <h1 id="hero-title" style="font-family: 'Playfair Display', serif; font-size: 48px; margin-bottom: 15px; text-shadow: 0 2px 10px rgba(0,0,0,0.5);"><?php echo htmlspecialchars($webData['heroTitleMain'] ?? 'Artisan BAKERY & Specialty COFFEE'); ?></h1>
+                <h1 id="hero-title" style="font-family: 'Playfair Display', serif; font-size: 48px; margin-bottom: 15px; text-shadow: 0 2px 10px rgba(0,0,0,0.5);"><?php echo htmlspecialchars($webData['heroTitleMain'] ?? 'Artisan Bakery & Specialty Coffee'); ?></h1>
                 <p style="font-family: 'Inter', sans-serif; font-size: 18px; max-width: 600px; margin: 0 auto; opacity: 0.9; text-shadow: 0 1px 5px rgba(0,0,0,0.5);"><?php echo htmlspecialchars($webData['heroTitleSub'] ?? 'Nikmati kesegaran roti dan kopi terbaik di Bandung setiap hari.'); ?></p>
              </div>
           </section>
