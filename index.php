@@ -575,14 +575,243 @@ $seoTitle = $siteName . " - " . ($webData['heroTitleMain'] ?? 'Artisan BAKERY & 
 
       // HIGH PERFORMANCE DEBOUNCED OBSERVER
       // Instead of running every mutation, we wait 100ms for React to settle
+          document.querySelectorAll('nav img, footer img, .logo img, [class*="footer"] img, img[alt*="logo"], img[alt*="Papwens"]').forEach(img => {
+             if (!img.dataset.hydrated) {
+                img.src = optLogo;
+                img.dataset.hydrated = "true";
+             }
+          });
+        }
+
+        // 3. Navigation & Title Highlights
+        if (config.siteName) {
+           document.querySelectorAll('.site-name, .brand-name').forEach(el => {
+             if (el.textContent !== config.siteName) el.textContent = config.siteName;
+           });
+        }
+
+        // 4. Hero Section Sync
+        if (settings.heroTitleMain) {
+           document.querySelectorAll('h1').forEach(h1 => {
+              if (h1.id === 'hero-title' || (h1.textContent.includes('BAKERY') && !h1.dataset.hydrated)) {
+                 h1.textContent = settings.heroTitleMain;
+                 h1.dataset.hydrated = "true";
+              }
+           });
+        }
+
+        // 6. Social Media Sync
+        if (contact.social_media) {
+           try {
+              const social = JSON.parse(contact.social_media);
+              social.forEach(item => {
+                 document.querySelectorAll(`a[href*="${item.platform.toLowerCase()}"]`).forEach(a => {
+                    if (a.href !== item.url) a.href = item.url;
+                 });
+              });
+           } catch(e) {}
+        }
+
+        // 7. Dynamic Images (Hero, About, etc)
+        if (settings.heroImage) {
+           const optHero = toWebp(settings.heroImage);
+           document.querySelectorAll('.hero-bg, .hero-image, #hero-skeleton').forEach(el => {
+              if (el.dataset.hydrated_img) return;
+              if (el.tagName === 'IMG') el.src = optHero;
+              else el.style.backgroundImage = `url("${optHero}")`;
+              el.dataset.hydrated_img = "true";
+           });
+        }
+        if (settings.aboutImage) {
+           const optAbout = toWebp(settings.aboutImage);
+           document.querySelectorAll('.about-image, img[alt*="About"]').forEach(img => {
+              if (!img.dataset.hydrated_img) {
+                img.src = optAbout;
+                img.dataset.hydrated_img = "true";
+              }
+           });
+        }
+
+        // 8. Map Sanitizer & Badge Shield (Preventing Mobile Gap)
+        document.querySelectorAll('iframe[src*="google.com/maps"]').forEach(iframe => {
+           if (!iframe.dataset.sanitized) {
+              iframe.style.width = '100%';
+              iframe.style.maxWidth = '100vw';
+              iframe.removeAttribute('width');
+              iframe.dataset.sanitized = "true";
+           }
+        });
+
+        // Badge Shield: Ensure rotating elements don't overflow
+        document.querySelectorAll('[class*="natural"], [class*="badge"], [class*="animate"]').forEach(el => {
+           if (el.offsetWidth > window.innerWidth) {
+              el.style.maxWidth = '100vw';
+              el.style.overflow = 'hidden';
+           }
+        });
+
+        // 8. Admin Dashboard Patch: Hapus Logo (Only on /admin)
+        if (window.location.pathname.includes('/admin')) {
+          const webSettingsForm = document.querySelector('form') || document.querySelector('#root');
+          if (webSettingsForm && (document.body.innerText.includes('Web Settings') || document.body.innerText.includes('Identitas'))) {
+             const logoSection = Array.from(document.querySelectorAll('label')).find(l => l.innerText.includes('Logo'));
+             if (logoSection && !document.getElementById('papwens-del-logo-btn')) {
+                const btn = document.createElement('button');
+                btn.id = 'papwens-del-logo-btn';
+                btn.type = 'button';
+                btn.innerText = 'X Hapus Logo';
+                btn.style = 'margin-left:10px; padding:4px 8px; background:#ff4444; color:white; border:none; border-radius:4px; cursor:pointer; font-size:12px;';
+                btn.onclick = async () => {
+                   if (!confirm('Hapus logo website?')) return;
+                   const newSettings = {...config.settings, siteLogo: ""};
+                   try {
+                     const resp = await fetch('/api/settings/web', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(newSettings)
+                     });
+                     if (resp.ok) {
+                        alert('Logo berhasil dihapus! Halaman akan dimuat ulang.');
+                        window.location.reload();
+                     }
+                   } catch(e) { alert('Gagal menghapus logo: ' + e); }
+                };
+                logoSection.appendChild(btn);
+             }
+          }
+        }
+
+        // 9. Footer Text-to-Logo Replacement & Fallback
+        const footer = document.querySelector('footer') || document.querySelector('[class*="footer"]');
+        if (footer) {
+          const siteNameDisplay = config.siteName || 'PAPWENS';
+          const brandArea = Array.from(footer.querySelectorAll('h1, h2, h3, h4, h5, div, span, a, p'))
+             .find(el => {
+                const txt = el.textContent.trim().toLowerCase();
+                const siteName = (config.siteName || '').toLowerCase();
+                // Ensure we only match the main logo area, NOT the copyright text
+                return el.children.length <= 1 && (txt === siteName || txt === 'papwens' || el.querySelector('img[alt*="logo"]'));
+             });
+
+          if (brandArea && !brandArea.dataset.hydrated) {
+             if (config.logo && config.logo !== '') {
+                if (!brandArea.querySelector('img')) {
+                   const img = document.createElement('img');
+                   img.src = config.logo;
+                   img.alt = siteNameDisplay;
+                   img.style = 'height: 48px; width: auto; margin-bottom: 20px; display: block; object-fit: contain;';
+                   brandArea.innerHTML = ''; 
+                   brandArea.appendChild(img);
+                }
+             } else {
+                brandArea.innerHTML = '';
+                brandArea.textContent = siteNameDisplay;
+                brandArea.style = 'font-family: "Playfair Display", serif; font-size: 24px; font-weight: 700; color: white; display: block; margin-bottom: 20px;';
+             }
+             brandArea.dataset.hydrated = "true";
+          }
+        }
+
+        // 10. Image SEO (ALT tags)
+        document.querySelectorAll('img').forEach(img => {
+           const src = img.src.toLowerCase();
+           if (!img.alt || img.alt === '' || img.alt.includes('dummy') || img.alt.includes('Placeholder')) {
+              if (src.includes('logo')) img.alt = config.siteName + ' Logo';
+              else if (img.closest('nav')) img.alt = config.siteName + ' Navigation Icon';
+              else if (img.closest('footer')) img.alt = config.siteName + ' Footer Branding';
+              else if (src.includes('hero')) img.alt = 'Artisan BAKERY & Specialty COFFEE at ' + config.siteName;
+              else if (src.includes('about')) img.alt = 'Our Story - ' + config.siteName;
+              else img.alt = 'Freshly Baked ' + config.siteName + ' Product';
+           }
+        });
+
+        // 11. Branding Update: "2021 Established" -> "25+ experience"
+        const findAndReplaceText = (root) => {
+           const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false);
+           let node;
+           while (node = walker.nextNode()) {
+              const text = node.nodeValue;
+              if (text && text.trim() === '2021') node.nodeValue = '25+';
+              if (text && text.trim().toUpperCase() === 'ESTABLISHED') node.nodeValue = 'EXPERIENCE';
+           }
+        };
+        findAndReplaceText(document.body);
+
+        // 12. Dynamic Admin Categories Sync (MySQL Source)
+        if (window.location.pathname.includes('/admin')) {
+           const catSelect = Array.from(document.querySelectorAll('select')).find(el => {
+              const label = el.closest('div')?.querySelector('label');
+              return label && label.innerText.toLowerCase().includes('kategori');
+           });
+
+           if (catSelect && !catSelect.dataset.synced) {
+              catSelect.dataset.synced = "true";
+              const currentVal = catSelect.value;
+              fetch('/api/menu.php?t=' + Date.now())
+                 .then(r => r.json())
+                 .then(items => {
+                    const dbCats = [...new Set(items.map(i => i.category))].filter(Boolean);
+                    const defaults = ['SOURDOUGH', 'PASTRY', 'COFFEE', 'Atmosphere'];
+                    const allCats = [...new Set([...defaults, ...dbCats])].sort();
+                    
+                    catSelect.innerHTML = '';
+                    allCats.forEach(cat => {
+                       const opt = document.createElement('option');
+                       opt.value = cat;
+                       opt.textContent = cat;
+                       if (cat === currentVal) opt.selected = true;
+                       catSelect.appendChild(opt);
+                    });
+                 }).catch(e => { catSelect.dataset.synced = ""; });
+           }
+        }
+
+      }
+
+      // HIGH PERFORMANCE DEBOUNCED OBSERVER
+      // Instead of running every mutation, we wait 100ms for React to settle
       let hydrationTimeout = null;
       const observer = new MutationObserver((mutations) => {
         if (hydrationTimeout) clearTimeout(hydrationTimeout);
         hydrationTimeout = setTimeout(() => {
            hydrateDynamicData();
-           syncAllCategories();
+           injectPillsSurgically();
         }, 100);
       });
+
+      // --- SURGICAL PILL INJECTION (HYDRATION RESISTANT) ---
+      const CUSTOM_PILLS_HTML = `
+        <div class="custom-filter-bar -webkit-scrollbar scrollbar-hide flex space-x-2 p-1 bg-warm-white rounded-full snap-x snap-mandatory mb-8 mx-auto w-max max-w-full overflow-x-auto">
+          <button data-cat="ALL" class="custom-p px-6 py-2 md:px-8 md:py-3 rounded-full text-xs md:text-sm font-semibold transition-all whitespace-nowrap flex-shrink-0 snap-center custom-p-active bg-espresso text-white shadow-custom-md">ALL</button>
+          <button data-cat="BAKERY" class="custom-p px-6 py-2 md:px-8 md:py-3 rounded-full text-xs md:text-sm font-semibold transition-all whitespace-nowrap flex-shrink-0 snap-center custom-p-inactive text-text-secondary hover:text-espresso">BAKERY</button>
+          <button data-cat="COFFEE" class="custom-p px-6 py-2 md:px-8 md:py-3 rounded-full text-xs md:text-sm font-semibold transition-all whitespace-nowrap flex-shrink-0 snap-center custom-p-inactive text-text-secondary hover:text-espresso">COFFEE</button>
+          <button data-cat="NON-COFFEE" class="custom-p px-6 py-2 md:px-8 md:py-3 rounded-full text-xs md:text-sm font-semibold transition-all whitespace-nowrap flex-shrink-0 snap-center custom-p-inactive text-text-secondary hover:text-espresso">NON-COFFEE</button>
+          <button data-cat="PASTRY" class="custom-p px-6 py-2 md:px-8 md:py-3 rounded-full text-xs md:text-sm font-semibold transition-all whitespace-nowrap flex-shrink-0 snap-center custom-p-inactive text-text-secondary hover:text-espresso">PASTRY</button>
+          <button data-cat="SOURDOUGH" class="custom-p px-6 py-2 md:px-8 md:py-3 rounded-full text-xs md:text-sm font-semibold transition-all whitespace-nowrap flex-shrink-0 snap-center custom-p-inactive text-text-secondary hover:text-espresso">SOURDOUGH</button>
+        </div>`;
+
+      function injectPillsSurgically() {
+        ['menu', 'gallery'].forEach(sid => {
+          const section = document.getElementById(sid);
+          if (!section) return;
+
+          // Find anchor for injection (Header or subtitle)
+          const anchor = Array.from(section.querySelectorAll('h2, p')).find(el => {
+             const t = el.textContent.toLowerCase();
+             return t.includes('menu') || t.includes('gallery') || t.includes('freshly') || t.includes('capturing');
+          });
+
+          if (anchor && !section.querySelector('.custom-filter-bar')) {
+             anchor.insertAdjacentHTML('afterend', CUSTOM_PILLS_HTML);
+          }
+
+          // Hide original React bar
+          const originalContainer = Array.from(section.querySelectorAll('div')).find(div => 
+             Array.from(div.querySelectorAll('button')).some(b => b.textContent.trim().toLowerCase() === 'all' && !b.hasAttribute('data-cat'))
+          );
+          if (originalContainer) originalContainer.style.display = 'none';
+        });
+      }
 
       // Safe Click Delegation for Custom Pills
       document.addEventListener('click', (e) => {
@@ -602,16 +831,18 @@ $seoTitle = $siteName . " - " . ($webData['heroTitleMain'] ?? 'Artisan BAKERY & 
         });
 
         // Trigger Hidden React Button
-        const categorySections = ['menu', 'gallery'];
-        categorySections.forEach(sid => {
+        ['menu', 'gallery'].forEach(sid => {
            const section = document.getElementById(sid);
            if (section) {
               const originalContainer = Array.from(section.querySelectorAll('div')).find(div => 
                 Array.from(div.querySelectorAll('button')).some(b => b.textContent.trim().toLowerCase() === 'all' && !b.hasAttribute('data-cat'))
               );
               if (originalContainer) {
-                 originalContainer.style.display = 'none';
-                 const origMatch = Array.from(originalContainer.querySelectorAll('button')).find(ob => ob.textContent.trim().toLowerCase() === cat.toLowerCase());
+                 const targetCat = cat.toLowerCase();
+                 const origMatch = Array.from(originalContainer.querySelectorAll('button')).find(ob => {
+                    const txt = ob.textContent.trim().toLowerCase();
+                    return txt === targetCat || (targetCat === 'non-coffee' && txt.includes('non'));
+                 });
                  if (origMatch) origMatch.click();
               }
            }
@@ -624,8 +855,8 @@ $seoTitle = $siteName . " - " . ($webData['heroTitleMain'] ?? 'Artisan BAKERY & 
       });
     </script>
 
-    <script type="module" crossorigin src="/assets/index-DU-yLjgB.js?v=BUILD_2026_04_18_V18" defer></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-fjww86zz.css?v=BUILD_2026_04_18_V18">
+    <script type="module" crossorigin src="/assets/index-DU-yLjgB.js?v=BUILD_2026_04_18_V19" defer></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-fjww86zz.css?v=BUILD_2026_04_18_V19">
     <style>
       #hero-skeleton { aspect-ratio: 16/9; }
       @media (max-width: 768px) { #hero-skeleton { aspect-ratio: 9/16; } }
