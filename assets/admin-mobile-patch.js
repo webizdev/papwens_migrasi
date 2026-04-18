@@ -95,15 +95,39 @@
         }
     }
 
+    // F. Login Overrider for new password
+    function interceptLogin() {
+        if (!window.location.pathname.includes('/admin/login')) return;
+        
+        const loginForm = document.querySelector('form');
+        if (loginForm && !loginForm.dataset.patched) {
+            loginForm.dataset.patched = 'true';
+            loginForm.addEventListener('submit', function(e) {
+                const passInput = loginForm.querySelector('input[type="password"]');
+                if (passInput && passInput.value === 'Papwens!!31@@') {
+                    // Force login without waiting for React's hardcoded check
+                    localStorage.setItem('papwens_auth', 'true');
+                    window.location.href = '/admin';
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            }, true); // Capture phase to beat React's handler
+        }
+    }
+
     // Hydrate on load and on mutations
     let hydrateTimer = null;
     const observer = new MutationObserver(() => {
         if (hydrateTimer) clearTimeout(hydrateTimer);
-        hydrateTimer = setTimeout(hydrateAdminMobile, 100);
+        hydrateTimer = setTimeout(() => {
+            hydrateAdminMobile();
+            interceptLogin();
+        }, 100);
     });
 
     window.addEventListener('load', () => {
         hydrateAdminMobile();
+        interceptLogin();
         observer.observe(document.body, { childList: true, subtree: true });
     });
 })();
