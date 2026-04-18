@@ -140,6 +140,13 @@ $seoTitle = $siteName . " - " . ($webData['heroTitleMain'] ?? 'Artisan Bakery & 
         font-family: 'Inter', sans-serif; overflow-x: hidden !important; width: 100% !important; 
         position: relative !important; max-width: 100vw !important; -webkit-overflow-scrolling: touch;
       }
+      /* Custom Pills & Hiding Original Filters */
+      #menu [class*="scrollbar-hide"][class*="snap-x"], 
+      #gallery [class*="scrollbar-hide"][class*="snap-x"] { display: none !important; }
+      .custom-p-active { background-color: #3d2b1f !important; color: white !important; }
+      .custom-p-inactive { color: #6b7280 !important; }
+      .custom-p-inactive:hover { color: #3d2b1f !important; }
+      
       #root, main, section, footer, .app-container { 
         overflow-x: hidden !important; width: 100% !important; max-width: 100% !important; 
         position: relative !important; box-sizing: border-box !important;
@@ -577,14 +584,48 @@ $seoTitle = $siteName . " - " . ($webData['heroTitleMain'] ?? 'Artisan Bakery & 
         }, 100);
       });
 
+      // Safe Click Delegation for Custom Pills
+      document.addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-cat]');
+        if (!btn) return;
+        const cat = btn.getAttribute('data-cat');
+        
+        // Sync Visual State
+        document.querySelectorAll('[data-cat]').forEach(b => {
+          if (b.getAttribute('data-cat') === cat) {
+            b.classList.add('custom-p-active', 'bg-espresso', 'text-white', 'shadow-custom-md');
+            b.classList.remove('custom-p-inactive', 'text-text-secondary');
+          } else {
+            b.classList.remove('custom-p-active', 'bg-espresso', 'text-white', 'shadow-custom-md');
+            b.classList.add('custom-p-inactive', 'text-text-secondary');
+          }
+        });
+
+        // Trigger Hidden React Button
+        const categorySections = ['menu', 'gallery'];
+        categorySections.forEach(sid => {
+           const section = document.getElementById(sid);
+           if (section) {
+              const originalContainer = Array.from(section.querySelectorAll('div')).find(div => 
+                Array.from(div.querySelectorAll('button')).some(b => b.textContent.trim().toLowerCase() === 'all' && !b.hasAttribute('data-cat'))
+              );
+              if (originalContainer) {
+                 originalContainer.style.display = 'none';
+                 const origMatch = Array.from(originalContainer.querySelectorAll('button')).find(ob => ob.textContent.trim().toLowerCase() === cat.toLowerCase());
+                 if (origMatch) origMatch.click();
+              }
+           }
+        });
+      });
+
       window.addEventListener('DOMContentLoaded', () => {
         hydrateDynamicData();
         observer.observe(document.body, { childList: true, subtree: true });
       });
     </script>
 
-    <script type="module" crossorigin src="/assets/index-DU-yLjgB.js?v=BUILD_2026_04_18_V15" defer></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-fjww86zz.css?v=BUILD_2026_04_18_V15">
+    <script type="module" crossorigin src="/assets/index-DU-yLjgB.js?v=BUILD_2026_04_18_V16" defer></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-fjww86zz.css?v=BUILD_2026_04_18_V16">
     <style>
       #hero-skeleton { aspect-ratio: 16/9; }
       @media (max-width: 768px) { #hero-skeleton { aspect-ratio: 9/16; } }
@@ -597,7 +638,32 @@ $seoTitle = $siteName . " - " . ($webData['heroTitleMain'] ?? 'Artisan Bakery & 
           <img src="<?php echo htmlspecialchars($siteLogoOptimized); ?>" alt="<?php echo htmlspecialchars($siteName); ?>" class="site-logo" height="40">
           <div id="skeleton-burger" style="width: 30px; height: 30px; border-radius: 50%; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);"></div>
        </header>
+
         <main>
+          <section id="menu-skeleton" style="padding: 60px 20px; text-align: center;">
+            <h2 style="font-family: 'Playfair Display', serif; font-size: 32px; margin-bottom: 30px;">Our Menu</h2>
+            
+            <div class="custom-filter-bar -webkit-scrollbar scrollbar-hide flex space-x-2 p-1 bg-warm-white rounded-full snap-x snap-mandatory mb-8 mx-auto w-max max-w-full overflow-x-auto">
+              <button data-cat="All" class="custom-p px-6 py-2 md:px-8 md:py-3 rounded-full text-xs md:text-sm font-semibold transition-all whitespace-nowrap flex-shrink-0 snap-center custom-p-active bg-espresso text-white shadow-custom-md">All</button>
+              <button data-cat="Bakery" class="custom-p px-6 py-2 md:px-8 md:py-3 rounded-full text-xs md:text-sm font-semibold transition-all whitespace-nowrap flex-shrink-0 snap-center custom-p-inactive text-text-secondary hover:text-espresso">Bakery</button>
+              <button data-cat="Coffee" class="custom-p px-6 py-2 md:px-8 md:py-3 rounded-full text-xs md:text-sm font-semibold transition-all whitespace-nowrap flex-shrink-0 snap-center custom-p-inactive text-text-secondary hover:text-espresso">Coffee</button>
+              <button data-cat="Non-Coffee" class="custom-p px-6 py-2 md:px-8 md:py-3 rounded-full text-xs md:text-sm font-semibold transition-all whitespace-nowrap flex-shrink-0 snap-center custom-p-inactive text-text-secondary hover:text-espresso">Non-Coffee</button>
+              <button data-cat="Pastry" class="custom-p px-6 py-2 md:px-8 md:py-3 rounded-full text-xs md:text-sm font-semibold transition-all whitespace-nowrap flex-shrink-0 snap-center custom-p-inactive text-text-secondary hover:text-espresso">Pastry</button>
+              <button data-cat="Sourdough" class="custom-p px-6 py-2 md:px-8 md:py-3 rounded-full text-xs md:text-sm font-semibold transition-all whitespace-nowrap flex-shrink-0 snap-center custom-p-inactive text-text-secondary hover:text-espresso">Sourdough</button>
+            </div>
+          </section>
+          <section id="gallery-skeleton" style="padding: 60px 20px; text-align: center;">
+            <h2 style="font-family: 'Playfair Display', serif; font-size: 32px; margin-bottom: 30px;">Gallery</h2>
+            
+            <div class="custom-filter-bar -webkit-scrollbar scrollbar-hide flex space-x-2 p-1 bg-warm-white rounded-full snap-x snap-mandatory mb-8 mx-auto w-max max-w-full overflow-x-auto">
+              <button data-cat="All" class="custom-p px-6 py-2 md:px-8 md:py-3 rounded-full text-xs md:text-sm font-semibold transition-all whitespace-nowrap flex-shrink-0 snap-center custom-p-active bg-espresso text-white shadow-custom-md">All</button>
+              <button data-cat="Bakery" class="custom-p px-6 py-2 md:px-8 md:py-3 rounded-full text-xs md:text-sm font-semibold transition-all whitespace-nowrap flex-shrink-0 snap-center custom-p-inactive text-text-secondary hover:text-espresso">Bakery</button>
+              <button data-cat="Coffee" class="custom-p px-6 py-2 md:px-8 md:py-3 rounded-full text-xs md:text-sm font-semibold transition-all whitespace-nowrap flex-shrink-0 snap-center custom-p-inactive text-text-secondary hover:text-espresso">Coffee</button>
+              <button data-cat="Non-Coffee" class="custom-p px-6 py-2 md:px-8 md:py-3 rounded-full text-xs md:text-sm font-semibold transition-all whitespace-nowrap flex-shrink-0 snap-center custom-p-inactive text-text-secondary hover:text-espresso">Non-Coffee</button>
+              <button data-cat="Pastry" class="custom-p px-6 py-2 md:px-8 md:py-3 rounded-full text-xs md:text-sm font-semibold transition-all whitespace-nowrap flex-shrink-0 snap-center custom-p-inactive text-text-secondary hover:text-espresso">Pastry</button>
+              <button data-cat="Sourdough" class="custom-p px-6 py-2 md:px-8 md:py-3 rounded-full text-xs md:text-sm font-semibold transition-all whitespace-nowrap flex-shrink-0 snap-center custom-p-inactive text-text-secondary hover:text-espresso">Sourdough</button>
+            </div>
+          </section>
           <section id="hero-skeleton" style="height: 100vh; display: flex; align-items: center; justify-content: center; background: #111 url('<?php echo htmlspecialchars($heroImageOptimized); ?>') center/cover no-repeat; color: white; text-align: center; padding: 20px; position: relative;">
              <div style="position: absolute; inset: 0; background: rgba(0,0,0,0.4); z-index: 1;"></div>
              <div style="position: relative; z-index: 2;">
