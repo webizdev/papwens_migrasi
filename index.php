@@ -89,7 +89,7 @@ $siteLogoOptimized = webp_url($webData['siteLogo'] ?? '');
 $heroImageOptimized = webp_url($webData['heroImage'] ?? '');
 
 // 3. Prepare variables
-$siteName = !empty($webData['siteName']) ? $webData['siteName'] : '';
+$siteName = !empty($webData['siteName']) ? $webData['siteName'] : 'PAPWENS';
 $siteLogo = !empty($webData['siteLogo']) ? $webData['siteLogo'] : ''; 
 $whatsappFull = !empty($contact['whatsapp']) ? $contact['whatsapp'] : '6281323331212';
 $whatsapp = preg_replace('/[^0-9]/', '', $whatsappFull);
@@ -121,8 +121,8 @@ $seoTitle = $siteName . " - " . ($webData['heroTitleMain'] ?? 'Artisan Bakery & 
     <title><?php echo htmlspecialchars($seoTitle); ?></title>
     
     <?php
-      $metaDesc = !empty($webData['metaDescription']) ? $webData['metaDescription'] : "";
-      $metaKeys = !empty($webData['metaKeywords']) ? $webData['metaKeywords'] : "";
+      $metaDesc = !empty($webData['metaDescription']) ? $webData['metaDescription'] : "Artisan Bakery & Specialty Coffee di Bandung. Nikmati Freshly Baked Bread, Pastry, dan Kopi Pilihan setiap hari di Papwens.";
+      $metaKeys = !empty($webData['metaKeywords']) ? $webData['metaKeywords'] : "bakery bandung, cafe bandung, artisan bakery, specialty coffee, papwens bandung, pastry bandung";
       $currentUrl = "https://papwens.com" . $_SERVER['REQUEST_URI'];
       $ogImageStatic = "/assets/og.png"; // User specified OG image
       $ogImage = !empty($siteLogo) ? $siteLogo : $ogImageStatic;
@@ -140,7 +140,6 @@ $seoTitle = $siteName . " - " . ($webData['heroTitleMain'] ?? 'Artisan Bakery & 
         font-family: 'Inter', sans-serif; overflow-x: hidden !important; width: 100% !important; 
         position: relative !important; max-width: 100vw !important; -webkit-overflow-scrolling: touch;
       }
-      .hydrated-logo { height: 48px; width: auto; margin-bottom: 20px; display: block; object-fit: contain; }
       #root, main, section, footer, .app-container { 
         overflow-x: hidden !important; width: 100% !important; max-width: 100% !important; 
         position: relative !important; box-sizing: border-box !important;
@@ -193,8 +192,9 @@ $seoTitle = $siteName . " - " . ($webData['heroTitleMain'] ?? 'Artisan Bakery & 
       "priceRange": "$$",
       "address": {
         "@type": "PostalAddress",
-        "streetAddress": "<?php echo addslashes($contact['address'] ?? ''); ?>",
+        "streetAddress": "Jl. Brigadir Jend. Katamso No.31, Cihaur Geulis",
         "addressLocality": "Bandung",
+        "postalCode": "40122",
         "addressCountry": "ID"
       },
       "geo": {
@@ -383,7 +383,7 @@ $seoTitle = $siteName . " - " . ($webData['heroTitleMain'] ?? 'Artisan Bakery & 
 
         // 3. Navigation & Title Highlights
         if (config.siteName) {
-           document.querySelectorAll('.site-name, .brand-name, a[href='#home'].font-heading').forEach(el => {
+           document.querySelectorAll('.site-name, .brand-name').forEach(el => {
              if (el.textContent !== config.siteName) el.textContent = config.siteName;
            });
         }
@@ -482,7 +482,7 @@ $seoTitle = $siteName . " - " . ($webData['heroTitleMain'] ?? 'Artisan Bakery & 
         // 9. Footer Text-to-Logo Replacement & Fallback
         const footer = document.querySelector('footer') || document.querySelector('[class*="footer"]');
         if (footer) {
-          const siteNameDisplay = config.siteName || '';
+          const siteNameDisplay = config.siteName || 'PAPWENS';
           const brandArea = Array.from(footer.querySelectorAll('h1, h2, h3, h4, h5, div, span, a, p'))
              .find(el => {
                 const txt = el.textContent.trim().toLowerCase();
@@ -494,10 +494,10 @@ $seoTitle = $siteName . " - " . ($webData['heroTitleMain'] ?? 'Artisan Bakery & 
           if (brandArea && !brandArea.dataset.hydrated) {
              if (config.logo && config.logo !== '') {
                 if (!brandArea.querySelector('img')) {
-                    const img = document.createElement('img');
-                    img.src = config.logo;
-                    img.alt = siteNameDisplay;
-                    img.className = 'hydrated-logo';
+                   const img = document.createElement('img');
+                   img.src = config.logo;
+                   img.alt = siteNameDisplay;
+                   img.style = 'height: 48px; width: auto; margin-bottom: 20px; display: block; object-fit: contain;';
                    brandArea.innerHTML = ''; 
                    brandArea.appendChild(img);
                 }
@@ -583,8 +583,8 @@ $seoTitle = $siteName . " - " . ($webData['heroTitleMain'] ?? 'Artisan Bakery & 
       });
     </script>
 
-    <script type="module" crossorigin src="/assets/index-DU-yLjgB.js?v=BUILD_2026_04_18_V4" defer></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-fjww86zz.css?v=BUILD_2026_04_18_V4">
+    <script type="module" crossorigin src="/assets/index-DU-yLjgB.js?v=BUILD_2026_04_18_V11" defer></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-fjww86zz.css?v=BUILD_2026_04_18_V11">
     <style>
       #hero-skeleton { aspect-ratio: 16/9; }
       @media (max-width: 768px) { #hero-skeleton { aspect-ratio: 9/16; } }
@@ -601,15 +601,15 @@ $seoTitle = $siteName . " - " . ($webData['heroTitleMain'] ?? 'Artisan Bakery & 
           <section id="hero-skeleton" style="height: 100vh; display: flex; align-items: center; justify-content: center; background: #111 url('<?php echo htmlspecialchars($heroImageOptimized); ?>') center/cover no-repeat; color: white; text-align: center; padding: 20px; position: relative;">
              <div style="position: absolute; inset: 0; background: rgba(0,0,0,0.4); z-index: 1;"></div>
              <div style="position: relative; z-index: 2;">
-                <h1 id="hero-title" style="font-family: 'Playfair Display', serif; font-size: 48px; margin-bottom: 15px; text-shadow: 0 2px 10px rgba(0,0,0,0.5);"><?php echo htmlspecialchars($webData['heroTitleMain'] ?? ''); ?></h1>
-                <p style="font-family: 'Inter', sans-serif; font-size: 18px; max-width: 600px; margin: 0 auto; opacity: 0.9; text-shadow: 0 1px 5px rgba(0,0,0,0.5);"><?php echo htmlspecialchars($webData['heroTitleSub'] ?? ''); ?></p>
+                <h1 id="hero-title" style="font-family: 'Playfair Display', serif; font-size: 48px; margin-bottom: 15px; text-shadow: 0 2px 10px rgba(0,0,0,0.5);"><?php echo htmlspecialchars($webData['heroTitleMain'] ?? 'Artisan Bakery & Specialty Coffee'); ?></h1>
+                <p style="font-family: 'Inter', sans-serif; font-size: 18px; max-width: 600px; margin: 0 auto; opacity: 0.9; text-shadow: 0 1px 5px rgba(0,0,0,0.5);"><?php echo htmlspecialchars($webData['heroTitleSub'] ?? 'Nikmati kesegaran roti dan kopi terbaik di Bandung setiap hari.'); ?></p>
              </div>
           </section>
           <section id="about-skeleton" style="padding: 80px 20px; background: white; color: #111;">
              <div style="max-width: 800px; margin: 0 auto; text-align: center;">
                 <h2 style="font-family: 'Playfair Display', serif; font-size: 32px; margin-bottom: 20px;">Our Story</h2>
                 <div style="font-family: 'Inter', sans-serif; line-height: 1.6; opacity: 0.9;">
-                   <?php echo nl2br(htmlspecialchars($webData['aboutDescription'] ?? '')); ?>
+                   <?php echo nl2br(htmlspecialchars($webData['aboutDescription'] ?? 'Papwens lahir dari kecintaan kami pada roti artisan dan kopi berkualitas tinggi. Kami percaya bahwa setiap gigitan dan seruputan harus memberikan pengalaman yang tak terlupakan.')); ?>
                 </div>
              </div>
           </section>
