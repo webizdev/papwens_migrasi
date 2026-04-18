@@ -257,28 +257,6 @@ $seoTitle = $siteName . " - " . ($webData['heroTitleMain'] ?? 'Artisan Bakery & 
       window.PAPWENS_MENU_DATA = window.PAPWENS_DB_CACHE["/api/menu"];
       window.PAPWENS_GALLERY_DATA = window.PAPWENS_DB_CACHE["/api/gallery"];
 
-      // 14. Sync Logic for Categories (Menu & Gallery)
-      function syncAllCategories() {
-         const isHome = window.location.pathname === '/' || window.location.pathname === '' || window.location.pathname.includes('index.php');
-         if (!isHome) return;
-
-         // Sync Gallery Items (Images)
-         document.querySelectorAll('img[alt], div[style*="background-image"]').forEach(el => {
-            if (el.dataset.categorySynced) return;
-            
-            // For Gallery, items usually have a title or alt text
-            const text = (el.alt || el.innerText || '').toLowerCase();
-            const match = (window.PAPWENS_GALLERY_DATA || []).find(m => text.includes(m.title.toLowerCase()));
-            
-            if (match) {
-               // Tag the container or the element itself
-               const container = el.closest('.relative') || el.parentElement;
-               container.dataset.category = match.category;
-               container.dataset.galleryTag = "true";
-               container.dataset.categorySynced = "true";
-            }
-         });
-      }
 
       // Surgical Hydration (overwriting hardcoded DOM elements)
       function hydrateDynamicData() {
@@ -287,69 +265,6 @@ $seoTitle = $siteName . " - " . ($webData['heroTitleMain'] ?? 'Artisan Bakery & 
         const settings = config.settings || {};
         const contact = config.contact || {};
 
-        // 13. Gallery Page Category Pill Injection ("Bakery")
-        const isGalleryHome = window.location.pathname === '/' || window.location.pathname === '' || window.location.pathname.includes('index.php');
-        if (isGalleryHome) {
-           const potentialAmbiance = Array.from(document.querySelectorAll('button, div, span')).find(el => {
-              return el.children.length === 0 && el.innerText.trim() === 'Ambiance';
-           });
-
-           if (potentialAmbiance) {
-              const container = potentialAmbiance.parentElement;
-              const allPill = Array.from(container.children).find(child => child.innerText.trim() === 'All');
-              
-              if (allPill && !container.querySelector('[data-bakery-pill]')) {
-                 const bakeryPill = potentialAmbiance.cloneNode(true);
-                 bakeryPill.innerText = 'Bakery';
-                 bakeryPill.dataset.bakeryPill = "true";
-                 bakeryPill.style.cursor = 'pointer';
-                 bakeryPill.classList.remove('bg-espresso', 'text-white', 'active');
-                 
-                 bakeryPill.onclick = (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    allPill.click();
-                    
-                    const applyFilter = () => {
-                        document.querySelectorAll('[data-gallery-tag]').forEach(item => {
-                           const cat = (item.dataset.category || '').toLowerCase();
-                           if (cat === 'bakery') {
-                              item.style.display = 'block';
-                              item.style.opacity = '1';
-                           } else {
-                              item.style.display = 'none';
-                           }
-                        });
-                        
-                        Array.from(container.children).forEach(p => {
-                           p.classList.remove('bg-espresso', 'text-white', 'active');
-                           if (!p.classList.contains('bg-warm-white')) p.classList.add('bg-warm-white');
-                           if (!p.classList.contains('text-text-secondary')) p.classList.add('text-text-secondary');
-                        });
-                        bakeryPill.classList.add('bg-espresso', 'text-white', 'active');
-                        bakeryPill.classList.remove('bg-warm-white', 'text-text-secondary');
-                    };
-
-                    setTimeout(applyFilter, 100);
-                    setTimeout(applyFilter, 300);
-                 };
-
-                 Array.from(container.children).forEach(p => {
-                    if (p !== bakeryPill) {
-                       p.addEventListener('click', () => {
-                          bakeryPill.classList.remove('bg-espresso', 'text-white', 'active');
-                          document.querySelectorAll('[data-gallery-tag]').forEach(item => {
-                             item.style.display = '';
-                             item.style.opacity = '';
-                          });
-                       });
-                    }
-                 });
-
-                 container.appendChild(bakeryPill);
-              }
-           }
-        }
         
         // Helper to force WebP in JS
         const toWebp = (url) => url ? url.replace(/\.(png|jpg|jpeg)$/i, '.webp') : '';
@@ -573,7 +488,6 @@ $seoTitle = $siteName . " - " . ($webData['heroTitleMain'] ?? 'Artisan Bakery & 
         if (hydrationTimeout) clearTimeout(hydrationTimeout);
         hydrationTimeout = setTimeout(() => {
            hydrateDynamicData();
-           syncAllCategories();
         }, 100);
       });
 
