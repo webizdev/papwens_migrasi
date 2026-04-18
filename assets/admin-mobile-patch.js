@@ -99,19 +99,40 @@
     function interceptLogin() {
         if (!window.location.pathname.includes('/admin/login')) return;
         
-        const loginForm = document.querySelector('form');
-        if (loginForm && !loginForm.dataset.patched) {
-            loginForm.dataset.patched = 'true';
-            loginForm.addEventListener('submit', function(e) {
-                const passInput = loginForm.querySelector('input[type="password"]');
-                if (passInput && passInput.value === 'Papwens!!31@@') {
-                    // Force login without waiting for React's hardcoded check
+        // React might render the login form as a div, not a <form>
+        const passInput = document.querySelector('input[type="password"]');
+        const loginBtn = Array.from(document.querySelectorAll('button')).find(btn => btn.innerText.includes('Masuk ke Panel'));
+
+        if (passInput && !passInput.dataset.patched) {
+            passInput.dataset.patched = 'true';
+            
+            const handleLogin = (e) => {
+                if (passInput.value === 'Papwens!!31@@') {
+                    console.log('Intercepting login with new password...');
                     localStorage.setItem('papwens_auth', 'true');
                     window.location.href = '/admin';
-                    e.preventDefault();
-                    e.stopPropagation();
+                    if (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }
+                    return true;
                 }
-            }, true); // Capture phase to beat React's handler
+                return false;
+            };
+
+            // Listen for Enter key on input
+            passInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    if (handleLogin(e)) return;
+                }
+            }, true);
+
+            // Listen for click on button
+            if (loginBtn) {
+                loginBtn.addEventListener('click', (e) => {
+                    handleLogin(e);
+                }, true);
+            }
         }
     }
 
