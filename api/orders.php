@@ -48,7 +48,9 @@ switch ($method) {
             sendJSON(['error' => 'Missing required fields'], 400);
         }
         $customerName = $db->real_escape_string($body['customerName']);
-        $phone = $db->real_escape_string($body['phone']);
+        $rawPhone = preg_replace('/[^0-9]/', '', $body['phone'] ?? '');
+        $formattedPhone = preg_replace('/^0/', '62', $rawPhone);
+        $phone = $db->real_escape_string($formattedPhone);
         $serviceType = $db->real_escape_string($body['serviceType'] ?? 'Dine In');
         $birthDate = $db->real_escape_string($body['birthDate'] ?? '');
         $address = $db->real_escape_string($body['address'] ?? '');
