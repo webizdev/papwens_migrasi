@@ -30,7 +30,7 @@ define('DB_NAME', getenv('DB_NAME') ?: 'papt1362_papwens.my.id');
 // =============================================
 // KONFIGURASI ADMIN
 // =============================================
-define('ADMIN_PASSWORD', '12345');       // Ganti dengan password admin Anda
+define('ADMIN_PASSWORD', 'Papwens!!31@@');       // Ganti dengan password admin Anda
 
 // =============================================
 // Koneksi Database
