@@ -157,6 +157,43 @@ $seoTitle = $siteName . " - " . ($webData['heroTitleMain'] ?? 'Artisan Bakery & 
         pointer-events: none;
       }
       
+      
+      /* Category Pills Styles */
+      .papwens-pill {
+          padding: 8px 20px;
+          font-size: 11px;
+          font-weight: 600;
+          text-transform: uppercase;
+          border-radius: 9999px;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          cursor: pointer;
+          background: #fdfaf7;
+          color: #8c7365;
+          border: 1px solid rgba(140, 115, 101, 0.1);
+          white-space: nowrap;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+      }
+      .papwens-pill.active {
+          background: #4a3b32;
+          color: white;
+          box-shadow: 0 4px 12px -2px rgba(74, 59, 50, 0.3);
+          border-color: #4a3b32;
+      }
+      .papwens-pill:hover:not(.active) {
+          background: #f5eee6;
+          color: #4a3b32;
+          transform: translateY(-1px);
+      }
+      
+      @media (min-width: 768px) {
+          .papwens-pill {
+              padding: 12px 32px;
+              font-size: 13px;
+          }
+      }
+      
       @media (max-width: 768px) { 
         #hero-title { font-size: 24px !important; line-height: 1.2; padding: 0 15px; } 
         header { padding: 10px 15px !important; }
@@ -495,20 +532,64 @@ $seoTitle = $siteName . " - " . ($webData['heroTitleMain'] ?? 'Artisan Bakery & 
         }
 
 
-         // 13. Permanent Removal of Category Pills (Deleting from DOM)
-         document.querySelectorAll('#menu [class*="scrollbar-hide"][class*="snap-x"], #gallery [class*="scrollbar-hide"][class*="snap-x"]').forEach(el => {
-            el.remove();
-         });
+         // 13. Menu Category Pills Injection & Filtering
+         const menuTitle = Array.from(document.querySelectorAll('h1, h2, h3, h4, p, span'))
+            .find(el => el.textContent.includes('Freshly Made, Just for You'));
 
-         // 14. Permanent Removal of Admin Welcome Text (Deleting from DOM)
-         if (window.location.pathname.includes('/admin')) {
-            document.querySelectorAll('h1, h2, p').forEach(el => {
-               const txt = el.textContent.toLowerCase();
-               if (txt.includes('selamat datang') || txt.includes('ringkasan data website')) {
-                  el.remove();
-               }
+         if (menuTitle && !document.getElementById('papwens-menu-pills')) {
+            const container = document.createElement('div');
+            container.id = 'papwens-menu-pills';
+            // Specific styling: Center, Wrap (No Scroll), Gap 12px
+            container.style = 'display:flex; justify-content:center; flex-wrap:wrap; gap:12px; margin: 30px auto; max-width: 900px; padding: 0 20px;';
+            
+            const cats = ['ALL', 'BAKERY', 'COFFEE', 'NON-COFFEE', 'PASTRY', 'SOURDOUGH'];
+            cats.forEach(cat => {
+               const btn = document.createElement('button');
+               btn.className = 'papwens-pill' + (cat === 'ALL' ? ' active' : '');
+               btn.textContent = cat;
+               btn.onclick = (e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  
+                  // Active state toggle
+                  container.querySelectorAll('.papwens-pill').forEach(b => b.classList.remove('active'));
+                  btn.classList.add('active');
+                  
+                  // Filtering logic
+                  const categoryToFilter = cat.toLowerCase();
+                  const menuGrid = document.querySelector('#menu [class*="grid"]'); // Find the main container
+                  const cards = Array.from(document.querySelectorAll('#menu [class*="card"], #menu [class*="item"]'))
+                     .filter(c => c.children.length > 1); // Basic heuristic to find cards
+                  
+                  cards.forEach(card => {
+                     if (categoryToFilter === 'all') {
+                        card.style.display = '';
+                     } else {
+                        // Compare card content with our config data categories
+                        const cardText = card.innerText.toLowerCase();
+                        const matchingItem = config.menu.find(m => cardText.includes(m.name.toLowerCase()));
+                        const itemCategory = (matchingItem ? matchingItem.category : '').toLowerCase();
+                        
+                        if (itemCategory.includes(categoryToFilter) || (categoryToFilter === 'bakery' && itemCategory === 'sourdough')) {
+                           card.style.display = '';
+                        } else {
+                           card.style.display = 'none';
+                        }
+                     }
+                  });
+               };
+               container.appendChild(btn);
             });
+            menuTitle.after(container);
          }
+         
+         // Cleanup OLD pills from any section (Menu/Gallery) if they reappear from React
+         document.querySelectorAll('[class*="scrollbar-hide"][class*="snap-x"]').forEach(el => {
+            // Only remove if it's the old version (not our new papwens-menu-pills)
+            if (el.id !== 'papwens-menu-pills') {
+               el.remove();
+            }
+         });
       }
 
       // HIGH PERFORMANCE DEBOUNCED OBSERVER
