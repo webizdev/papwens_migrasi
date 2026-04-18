@@ -4,7 +4,7 @@ $db = getDB();
 
 // 0. Simple File Cache for DB results
 $cacheFile = __DIR__ . '/uploads/settings_cache.json';
-$cacheTime = 30; // 30 seconds
+$cacheTime = 60; // 60 seconds (Safe for Shared Hosting)
 $webData = []; $contact = []; $menuData = []; $galleryData = []; $testimonialsData = [];
 
 if (file_exists($cacheFile) && (time() - filemtime($cacheFile) < $cacheTime)) {
@@ -307,15 +307,16 @@ $seoTitle = $siteName . " - " . ($webData['heroTitleMain'] ?? 'Artisan Bakery & 
         const toWebp = (url) => url ? url.replace(/\.(png|jpg|jpeg)$/i, '.webp') : '';
 
         // 0. Global Perf: Lazy Load Images (except Hero)
-        document.querySelectorAll('img:not([loading])').forEach(img => {
+        document.querySelectorAll('img:not([loading]):not([data-hydrated])').forEach(img => {
            if (!img.src.includes('hero') && !img.className.includes('logo')) {
               img.setAttribute('loading', 'lazy');
+              img.dataset.hydrated = "true";
            }
         });
 
         // 1. WhatsApp Links
-        document.querySelectorAll('a[href*="wa.me"], a[href*="whatsapp.com"]').forEach(a => {
-           if (config.whatsapp && !a.dataset.hydrated) {
+        document.querySelectorAll('a[href*="wa.me"]:not([data-hydrated]), a[href*="whatsapp.com"]:not([data-hydrated])').forEach(a => {
+           if (config.whatsapp) {
               const cleanWa = config.whatsapp.replace(/[^0-9]/g, '');
               a.href = "https://wa.me/" + cleanWa;
               a.dataset.hydrated = "true";
@@ -325,25 +326,26 @@ $seoTitle = $siteName . " - " . ($webData['heroTitleMain'] ?? 'Artisan Bakery & 
         // 2. Logo Replacement (Site-wide)
         if (config.logo) {
           const optLogo = toWebp(config.logo);
-          document.querySelectorAll('nav img, footer img, .logo img, [class*="footer"] img, img[alt*="logo"], img[alt*="Papwens"]').forEach(img => {
-             if (!img.dataset.hydrated) {
-                img.src = optLogo;
-                img.dataset.hydrated = "true";
-             }
+          document.querySelectorAll('nav img:not([data-hydrated]), footer img:not([data-hydrated]), .logo img:not([data-hydrated]), [class*="footer"] img:not([data-hydrated]), img[alt*="logo"]:not([data-hydrated]), img[alt*="Papwens"]:not([data-hydrated])').forEach(img => {
+             img.src = optLogo;
+             img.dataset.hydrated = "true";
           });
         }
 
         // 3. Navigation & Title Highlights
         if (config.siteName) {
-           document.querySelectorAll('.site-name, .brand-name').forEach(el => {
-             if (el.textContent !== config.siteName) el.textContent = config.siteName;
+           document.querySelectorAll('.site-name:not([data-hydrated]), .brand-name:not([data-hydrated])').forEach(el => {
+             if (el.textContent !== config.siteName) {
+                el.textContent = config.siteName;
+                el.dataset.hydrated = "true";
+             }
            });
         }
 
         // 4. Hero Section Sync
         if (settings.heroTitleMain) {
-           document.querySelectorAll('h1').forEach(h1 => {
-              if (h1.id === 'hero-title' || (h1.textContent.includes('Bakery') && !h1.dataset.hydrated)) {
+           document.querySelectorAll('h1:not([data-hydrated])').forEach(h1 => {
+              if (h1.id === 'hero-title' || h1.textContent.includes('Bakery')) {
                  h1.textContent = settings.heroTitleMain;
                  h1.dataset.hydrated = "true";
               }
@@ -355,8 +357,11 @@ $seoTitle = $siteName . " - " . ($webData['heroTitleMain'] ?? 'Artisan Bakery & 
            try {
               const social = JSON.parse(contact.social_media);
               social.forEach(item => {
-                 document.querySelectorAll(`a[href*="${item.platform.toLowerCase()}"]`).forEach(a => {
-                    if (a.href !== item.url) a.href = item.url;
+                 document.querySelectorAll(`a[href*="${item.platform.toLowerCase()}"]:not([data-hydrated])`).forEach(a => {
+                    if (a.href !== item.url) {
+                       a.href = item.url;
+                       a.dataset.hydrated = "true";
+                    }
                  });
               });
            } catch(e) {}
@@ -383,21 +388,20 @@ $seoTitle = $siteName . " - " . ($webData['heroTitleMain'] ?? 'Artisan Bakery & 
         }
 
         // 8. Map Sanitizer & Badge Shield (Preventing Mobile Gap)
-        document.querySelectorAll('iframe[src*="google.com/maps"]').forEach(iframe => {
-           if (!iframe.dataset.sanitized) {
-              iframe.style.width = '100%';
-              iframe.style.maxWidth = '100vw';
-              iframe.removeAttribute('width');
-              iframe.dataset.sanitized = "true";
-           }
+        document.querySelectorAll('iframe[src*="google.com/maps"]:not([data-sanitized])').forEach(iframe => {
+           iframe.style.width = '100%';
+           iframe.style.maxWidth = '100vw';
+           iframe.removeAttribute('width');
+           iframe.dataset.sanitized = "true";
         });
 
         // Badge Shield: Ensure rotating elements don't overflow
-        document.querySelectorAll('[class*="natural"], [class*="badge"], [class*="animate"]').forEach(el => {
+        document.querySelectorAll('[class*="natural"]:not([data-shielded]), [class*="badge"]:not([data-shielded]), [class*="animate"]:not([data-shielded])').forEach(el => {
            if (el.offsetWidth > window.innerWidth) {
               el.style.maxWidth = '100vw';
               el.style.overflow = 'hidden';
            }
+           el.dataset.shielded = "true";
         });
 
         // 8. Admin Dashboard Patch: Hapus Logo (Only on /admin)
@@ -478,7 +482,7 @@ $seoTitle = $siteName . " - " . ($webData['heroTitleMain'] ?? 'Artisan Bakery & 
         }
 
         // 10. Image SEO (ALT tags)
-        document.querySelectorAll('img').forEach(img => {
+        document.querySelectorAll('img:not([data-seo])').forEach(img => {
            const src = img.src.toLowerCase();
            if (!img.alt || img.alt === '' || img.alt.includes('dummy') || img.alt.includes('Placeholder')) {
               if (src.includes('logo')) img.alt = config.siteName + ' Logo';
@@ -488,19 +492,23 @@ $seoTitle = $siteName . " - " . ($webData['heroTitleMain'] ?? 'Artisan Bakery & 
               else if (src.includes('about')) img.alt = 'Our Story - ' + config.siteName;
               else img.alt = 'Freshly Baked ' + config.siteName + ' Product';
            }
+           img.dataset.seo = "true";
         });
 
         // 11. Branding Update: "2021 Established" -> "25+ experience"
-        const findAndReplaceText = (root) => {
-           const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false);
-           let node;
-           while (node = walker.nextNode()) {
-              const text = node.nodeValue;
-              if (text && text.trim() === '2021') node.nodeValue = '25+';
-              if (text && text.trim().toUpperCase() === 'ESTABLISHED') node.nodeValue = 'EXPERIENCE';
-           }
-        };
-        findAndReplaceText(document.body);
+        if (!document.body.dataset.brandUpdated) {
+           const findAndReplaceText = (root) => {
+              const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false);
+              let node;
+              while (node = walker.nextNode()) {
+                 const text = node.nodeValue;
+                 if (text && text.trim() === '2021') node.nodeValue = '25+';
+                 if (text && text.trim().toUpperCase() === 'ESTABLISHED') node.nodeValue = 'EXPERIENCE';
+              }
+           };
+           findAndReplaceText(document.body);
+           document.body.dataset.brandUpdated = "true";
+        }
 
         // 12. Dynamic Admin Categories Sync (MySQL Source)
         if (window.location.pathname.includes('/admin')) {
@@ -516,7 +524,7 @@ $seoTitle = $siteName . " - " . ($webData['heroTitleMain'] ?? 'Artisan Bakery & 
                  .then(r => r.json())
                  .then(items => {
                     const dbCats = [...new Set(items.map(i => i.category))].filter(Boolean);
-                    const defaults = ['Sourdough', 'Pastry', 'Coffee', 'Atmosphere'];
+                    const defaults = ['Bakery', 'Sourdough', 'Pastry', 'Coffee', 'Atmosphere'];
                     const allCats = [...new Set([...defaults, ...dbCats])].sort();
                     
                     catSelect.innerHTML = '';
@@ -600,24 +608,20 @@ $seoTitle = $siteName . " - " . ($webData['heroTitleMain'] ?? 'Artisan Bakery & 
             menuTitle.after(container);
          }
 
-         // 14. Operating Hours Patch
-         const hoursHeading = Array.from(document.querySelectorAll('h1, h2, h3, h4, h5, p, span'))
-            .find(el => el.textContent.trim() === 'Operating Hours');
-         if (hoursHeading) {
-            const container = hoursHeading.parentElement;
-            if (container && !container.dataset.hoursHydrated) {
-               const originalHTML = container.innerHTML;
-               // Patching Senin-Jumat and Sabtu-Minggu hours
-               const updatedHTML = originalHTML
+         // 14. Operating Hours Patch (Robust Version)
+         document.querySelectorAll('span, p, div, h3, h4').forEach(el => {
+            if (el.children.length === 0 && !el.dataset.hoursHydrated) {
+               const original = el.textContent;
+               const updated = original
                   .replace(/08\.00\s*[–-]\s*21\.00/g, '07.00 – 21.00')
                   .replace(/07\.00\s*[–-]\s*22\.00/g, '07.00 – 21.00');
                
-               if (originalHTML !== updatedHTML) {
-                  container.innerHTML = updatedHTML;
-                  container.dataset.hoursHydrated = "true";
+               if (original !== updated) {
+                  el.textContent = updated;
+                  el.dataset.hoursHydrated = "true";
                }
             }
-         }
+         });
          
          // Cleanup OLD pills from any section (Menu/Gallery) if they reappear from React
          document.querySelectorAll('[class*="scrollbar-hide"][class*="snap-x"]').forEach(el => {

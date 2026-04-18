@@ -71,6 +71,23 @@ function sendJSON($data, int $code = 200): void {
     exit;
 }
 
+/**
+ * =============================================
+ * Helper: Clear settings cache and purge server cache
+ * =============================================
+ */
+function clearCache(): void {
+    $cacheFile = __DIR__ . '/../uploads/settings_cache.json';
+    if (file_exists($cacheFile)) {
+        @unlink($cacheFile);
+    }
+    
+    // Purge signals for common shared hosting cache layers (LiteSpeed, Nginx, etc)
+    header('X-LiteSpeed-Purge: *');
+    header('X-Accel-Expires: 0');
+    header('Clear-Site-Data: "cache"');
+}
+
 // =============================================
 // Helper: Get Request Body as Array
 // =============================================

@@ -26,6 +26,7 @@ switch ($method) {
         if (!$success) {
             sendJSON(['error' => 'Database error: ' . $db->error], 500);
         }
+        clearCache();
         sendJSON(['success' => true, 'id' => $db->insert_id]);
         break;
 
@@ -40,6 +41,7 @@ switch ($method) {
         if (!$success) {
             sendJSON(['error' => 'Database error: ' . $db->error], 500);
         }
+        clearCache();
         sendJSON(['success' => true]);
         break;
 
@@ -50,6 +52,7 @@ switch ($method) {
         if (!$success) {
             sendJSON(['error' => 'Database error: ' . $db->error], 500);
         }
+        clearCache();
         sendJSON(['success' => true]);
         break;
 

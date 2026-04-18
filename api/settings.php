@@ -18,6 +18,7 @@ if (strpos($uri, 'store-status') !== false) {
         if (!$success) {
             sendJSON(['error' => 'Database error: ' . $db->error], 500);
         }
+        clearCache();
         sendJSON(['success' => true, 'status' => $status]);
     }
     sendJSON(['error' => 'Method not allowed'], 405);
@@ -73,7 +74,7 @@ if (strpos($uri, 'contact') !== false) {
         if (!$success) {
             sendJSON(['error' => 'Database error: ' . $db->error], 500);
         }
-        @unlink(__DIR__ . '/../uploads/settings_cache.json');
+        clearCache();
         sendJSON(['success' => true]);
     }
     sendJSON(['error' => 'Method not allowed'], 405);
@@ -126,7 +127,7 @@ if (strpos($uri, 'web') !== false) {
         if (!$success) {
             sendJSON(['error' => 'Database error: ' . $db->error], 500);
         }
-        @unlink(__DIR__ . '/../uploads/settings_cache.json');
+        clearCache();
         sendJSON(['success' => true]);
     }
     sendJSON(['error' => 'Method not allowed'], 405);
