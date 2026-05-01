@@ -8,6 +8,10 @@ scratch/
 .gemini/
 *.tmp
 *.log
+error_log
+out.txt
+err.txt
+*.bat
 
 # Zip backups
 *.zip

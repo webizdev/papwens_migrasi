@@ -26,9 +26,9 @@ if (!function_exists('str_ends_with')) {
 $is_docker = getenv('IS_DOCKER') === 'true';
 
 define('DB_HOST', getenv('DB_HOST') ?: ($is_docker ? 'db' : 'localhost'));
-define('DB_USER', getenv('DB_USER') ?: 'papt1362_papwensmyid');
-define('DB_PASS', getenv('DB_PASSWORD') ?: 'VUqjwFArtB285XhNxRZc');
-define('DB_NAME', getenv('DB_NAME') ?: 'papt1362_papwens.my.id');
+define('DB_USER', getenv('DB_USER') ?: 'papy7652_papwenscom');
+define('DB_PASS', getenv('DB_PASSWORD') ?: 'Datapapwens_com');
+define('DB_NAME', getenv('DB_NAME') ?: 'papy7652_papwenscom');
 
 // =============================================
 // KONFIGURASI ADMIN
